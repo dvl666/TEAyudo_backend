@@ -29,4 +29,12 @@ export class UserService {
         return this.userRepository.save(user);
     }
 
+    async findOneUserWithInfants(id: string): Promise<User | null> {
+        const user = await this.userRepository.findOne({
+            where: { id },
+            relations: { infants: true },
+        });
+        return user;
+    }
+
 }

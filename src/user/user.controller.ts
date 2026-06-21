@@ -25,4 +25,11 @@ export class UserController {
     return this.userService.create(userData);
   }
 
+  @Get(':id/infants')
+  findOneUserWithInfants(
+    @Param('id') id: string,
+  ): Promise<User | null> {
+    return this.userService.findOneUserWithInfants(id);
+  }
+
 }
