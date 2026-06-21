@@ -16,7 +16,7 @@ export class Infant {
   lastName: string;
 
   @Column()
-  birthDate: Date;
+  birthDate: string;
 
   @Column()
   avatarUrl: string;
