@@ -3,6 +3,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm/browser/repository/Repository.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { LoginDto } from './dtos/login.dto';
 
 @Injectable()
 export class UserService {
@@ -35,6 +36,20 @@ export class UserService {
             relations: { infants: true },
         });
         return user;
+    }
+
+    async findOneByEmail(email: string): Promise<User> {
+        const user = await this.userRepository.findOneBy({ email });
+        if (!user) {
+            throw new NotFoundException(`User with email ${email} not found`);
+        }
+        return user;
+    }
+
+    async login(loginData: LoginDto): Promise<boolean> {
+        const user = await this.findOneByEmail(loginData.email);
+        if (user.password !== loginData.password) throw new NotFoundException(`Invalid password for user with email ${loginData.email}`);
+        return true;
     }
 
 }
