@@ -38,4 +38,9 @@ export class UserController {
     return this.userService.login(loginDto);
   }
 
+  @Post(':userId/validate-pin')
+  validateAdministrativePin( @Param('userId') userId: string, @Body('pin') pin: string ): Promise<boolean> {
+    return this.userService.validateAdministrativePin(userId, pin);
+  }
+
 }
