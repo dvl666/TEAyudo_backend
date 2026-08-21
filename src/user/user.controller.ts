@@ -33,10 +33,10 @@ export class UserController {
     return this.userService.findOneUserWithInfants(id);
   }
 
-  @Post('/login')
-  login(@Body() loginDto: LoginDto): Promise<boolean> {
-    return this.userService.login(loginDto);
-  }
+  // @Post('/login')
+  // login(@Body() loginDto: LoginDto): Promise<boolean> {
+  //   return this.userService.login(loginDto);
+  // }
 
   @Post(':userId/validate-pin')
   validateAdministrativePin( @Param('userId') userId: string, @Body('pin') pin: string ): Promise<boolean> {
