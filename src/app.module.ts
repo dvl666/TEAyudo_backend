@@ -22,6 +22,7 @@ import { Phrase } from './phrase/entities/phrase.entity';
 import { PhrasePictogram } from './phrase-pictogram/entities/phrase-pictogram.entity';
 import { GameProgress } from './game-progress/entities/game-progress.entity';
 import { Category } from './category/entities/category.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { Category } from './category/entities/category.entity';
     GameProgressModule,
     RoutineModule,
     StorySceneModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
