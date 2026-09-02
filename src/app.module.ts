@@ -24,6 +24,7 @@ import { GameProgress } from './game-progress/entities/game-progress.entity';
 import { Category } from './category/entities/category.entity';
 import { StorageModule } from './storage/storage.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { ConfigModule } from '@nestjs/config';
     RoutineModule,
     StorySceneModule,
     StorageModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
