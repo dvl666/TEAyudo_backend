@@ -22,18 +22,32 @@ import { Phrase } from './phrase/entities/phrase.entity';
 import { PhrasePictogram } from './phrase-pictogram/entities/phrase-pictogram.entity';
 import { GameProgress } from './game-progress/entities/game-progress.entity';
 import { Category } from './category/entities/category.entity';
+import { StorageModule } from './storage/storage.module';
+import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'dvl',
-      password: '666',
-      database: 'appdb',
-      entities: [User, Routine, Game, Infant, Pictogram, Phrase, PhrasePictogram, StoryScene, GameProgress, Category],
+      host: process.env.DB_HOST ?? 'localhost',
+      port: Number(process.env.DB_PORT ?? 5432),
+      username: process.env.DB_USERNAME ?? 'dvl',
+      password: process.env.DB_PASSWORD ?? '666',
+      database: process.env.DB_DATABASE ?? 'appdb',
+      entities: [
+        User,
+        Routine,
+        Game,
+        Infant,
+        Pictogram,
+        Phrase,
+        PhrasePictogram,
+        StoryScene,
+        GameProgress,
+        Category,
+      ],
       synchronize: true,
     }),
     UserModule,
@@ -46,6 +60,7 @@ import { AuthModule } from './auth/auth.module';
     GameProgressModule,
     RoutineModule,
     StorySceneModule,
+    StorageModule,
     AuthModule,
   ],
   controllers: [AppController],

@@ -12,5 +12,6 @@ import { UserModule } from 'src/user/user.module';
   ],
   controllers: [InfantController],
   providers: [InfantService],
+  exports: [InfantService],
 })
 export class InfantModule {}
