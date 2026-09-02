@@ -37,7 +37,7 @@ export class StorageService implements OnModuleInit {
 
   async upload(body: Buffer, originalName: string, contentType: string) {
     const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '-');
-    const key = `${randomUUID()}-${safeName}`;
+    const key = `pictogramas/${randomUUID()}-${safeName}`;
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
