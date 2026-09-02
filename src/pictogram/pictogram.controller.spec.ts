@@ -8,7 +8,17 @@ describe('PictogramController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PictogramController],
-      providers: [PictogramService],
+      providers: [
+        {
+          provide: PictogramService,
+          useValue: {
+            create: jest.fn(),
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+            findByCategory: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<PictogramController>(PictogramController);
