@@ -12,9 +12,9 @@ import { randomUUID } from 'crypto';
 
 @Injectable()
 export class StorageService implements OnModuleInit {
-  private readonly bucket = process.env.S3_BUCKET ?? 'teayudo';
+  private readonly bucket = process.env.AWS_S3_BUCKET_NAME ?? 'teayudo';
   private readonly client = new S3Client({
-    region: process.env.S3_REGION ?? 'us-east-1',
+    region: process.env.AWS_REGION ?? 'sa-east-1',
     endpoint: process.env.S3_ENDPOINT || undefined,
     forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
     credentials:
