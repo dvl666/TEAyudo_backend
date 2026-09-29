@@ -44,6 +44,7 @@ export class StorageService implements OnModuleInit {
         Key: key,
         Body: body,
         ContentType: contentType,
+        ContentDisposition: 'inline',
       }),
     );
     return { key, url: await this.getSignedUrl(key) };
@@ -58,17 +59,36 @@ export class StorageService implements OnModuleInit {
         Key: key,
         Body: body,
         ContentType: contentType,
+        ContentDisposition: 'inline',
       }),
     );
     return { key, url: await this.getSignedUrl(key) };
   }
 
   getSignedUrl(key: string, expiresIn = 3600): Promise<string> {
+    const responseContentType = this.getImageContentType(key);
     return getSignedUrl(
       this.client,
-      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        ResponseContentDisposition: 'inline',
+        ResponseContentType: responseContentType,
+      }),
       { expiresIn },
     );
+  }
+
+  private getImageContentType(key: string): string | undefined {
+    const extension = key.split('.').pop()?.toLowerCase();
+    const contentTypes: Record<string, string> = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      webp: 'image/webp',
+      gif: 'image/gif',
+    };
+    return extension ? contentTypes[extension] : undefined;
   }
 
   async delete(key: string): Promise<void> {
