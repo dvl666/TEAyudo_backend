@@ -4,12 +4,10 @@ import { InfantController } from './infant.controller';
 import { Infant } from './entities/infant.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from 'src/user/user.module';
+import { StorageModule } from 'src/storage/storage.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Infant]),
-    UserModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Infant]), UserModule, StorageModule],
   controllers: [InfantController],
   providers: [InfantService],
   exports: [InfantService],

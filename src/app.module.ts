@@ -36,6 +36,13 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DB_USERNAME ?? 'dvl',
       password: process.env.DB_PASSWORD ?? '666',
       database: process.env.DB_DATABASE ?? 'appdb',
+      ssl:
+        process.env.DB_SSL === 'true'
+          ? {
+              // Solo para pruebas: cifra sin verificar el certificado del servidor.
+              rejectUnauthorized: false,
+            }
+          : false,
       entities: [
         User,
         Routine,

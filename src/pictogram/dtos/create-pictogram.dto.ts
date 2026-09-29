@@ -26,7 +26,7 @@ export class CreatePictogramDto {
 
   @IsUUID()
   userId: string;
-
+  
   @IsUUID()
   infantId: string;
 }
