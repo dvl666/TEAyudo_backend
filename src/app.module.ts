@@ -43,6 +43,7 @@ import { AuthModule } from './auth/auth.module';
               rejectUnauthorized: false,
             }
           : false,
+        extra: process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : undefined,
       entities: [
         User,
         Routine,
@@ -57,7 +58,6 @@ import { AuthModule } from './auth/auth.module';
       ],
       synchronize: true,
       // ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-      extra: process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : undefined,
     }),
     UserModule,
     InfantModule,
