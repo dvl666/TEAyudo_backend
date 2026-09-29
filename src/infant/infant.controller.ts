@@ -5,6 +5,7 @@ import {
   Get,
   MaxFileSizeValidator,
   Param,
+  Patch,
   ParseFilePipe,
   ParseUUIDPipe,
   Post,
@@ -16,6 +17,7 @@ import { InfantService } from './infant.service';
 import { Infant } from './entities/infant.entity';
 import { CreateInfantDto } from './dtos/create-infant.dto';
 import type { InfantAvatarFile } from './infant.service';
+import { UpdateInfantDto } from './dtos/update-infant.dto';
 
 @Controller('infant')
 export class InfantController {
@@ -31,9 +33,34 @@ export class InfantController {
     return this.infantService.create(createInfantDto);
   }
 
+  @Patch(':id')
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() updateInfantDto: UpdateInfantDto,
+  ): Promise<Infant> {
+    return this.infantService.update(id, updateInfantDto);
+  }
+
   @Post(':id/avatar')
   @UseInterceptors(FileInterceptor('file'))
   uploadAvatar(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|webp|gif)$/ }),
+        ],
+      }),
+    )
+    file: InfantAvatarFile,
+  ): Promise<Record<string, unknown>> {
+    return this.infantService.uploadAvatar(id, file);
+  }
+
+  @Patch(':id/avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  updateAvatar(
     @Param('id', new ParseUUIDPipe()) id: string,
     @UploadedFile(
       new ParseFilePipe({

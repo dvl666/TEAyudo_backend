@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateInfantDto } from './dtos/create-infant.dto';
 import { UserService } from 'src/user/user.service';
 import { StorageService } from 'src/storage/storage.service';
+import { UpdateInfantDto } from './dtos/update-infant.dto';
 
 export interface InfantAvatarFile {
   buffer: Buffer;
@@ -39,10 +40,16 @@ export class InfantService {
     return infant;
   }
 
-  async uploadAvatar(
-    id: string,
-    file: InfantAvatarFile,
-  ): Promise<Record<string, unknown>> {
+  async update(id: string, updateInfantDto: UpdateInfantDto): Promise<Infant> {
+    const infant = await this.findOne(id);
+    const updatedInfant = {
+      ...infant,
+      ...updateInfantDto,
+    }
+    return this.infantRepository.save(updatedInfant);
+  }
+
+  async uploadAvatar(id: string, file: InfantAvatarFile): Promise<Record<string, unknown>> {
     const infant = await this.findOne(id);
     const previousAvatarKey = infant.avatarUrl;
     const uploaded = await this.storageService.uploadAvatar(
