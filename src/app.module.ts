@@ -56,7 +56,7 @@ import { AuthModule } from './auth/auth.module';
         Category,
       ],
       synchronize: true,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      // ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
       extra: process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : undefined,
     }),
     UserModule,
