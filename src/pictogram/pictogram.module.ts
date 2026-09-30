@@ -21,5 +21,6 @@ import { InfantModule } from 'src/infant/infant.module';
   ],
   controllers: [PictogramController],
   providers: [PictogramService],
+  exports: [PictogramService],
 })
 export class PictogramModule {}
