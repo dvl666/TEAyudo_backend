@@ -15,6 +15,7 @@ import { StorySceneModule } from './story-scene/story-scene.module';
 import { User } from './user/entities/user.entity';
 import { StoryScene } from './story-scene/entities/story-scene.entity';
 import { Routine } from './routine/entities/routine.entity';
+import { RoutineActivity } from './routine/entities/routine-activity.entity';
 import { Game } from './game/entities/game.entity';
 import { Infant } from './infant/entities/infant.entity';
 import { Pictogram } from './pictogram/entities/pictogram.entity';
@@ -47,6 +48,7 @@ import { AuthModule } from './auth/auth.module';
       entities: [
         User,
         Routine,
+        RoutineActivity,
         Game,
         Infant,
         Pictogram,
