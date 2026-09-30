@@ -75,6 +75,11 @@ export class RoutineController {
     return this.routineService.updateActivity(routineId, activityId, dto);
   }
 
+  @Get(':routineId')
+  findByRoutineId(@Param('routineId', ParseUUIDPipe) routineId: string) {
+    return this.routineService.findByRoutineId(routineId);
+  }
+
   // @Delete(':routineId/activities/:activityId')
   // @HttpCode(HttpStatus.NO_CONTENT)
   // removeActivity(

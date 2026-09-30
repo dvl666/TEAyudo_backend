@@ -216,6 +216,14 @@ export class RoutineService {
   async findByRoutineId(routineId: string): Promise<Routine> {
     const routine = await this.routineRepository.findOne({
       where: { id: routineId },
+      relations: {
+        activities: {
+          pictogram: true,
+        },
+      },
+      order: {
+        activities: { position: 'ASC', id: 'ASC' },
+      },
     });
 
     if (!routine) throw new NotFoundException('La rutina no existe');
