@@ -1,26 +1,30 @@
-import { on } from 'events';
 import { Infant } from 'src/infant/entities/infant.entity';
-import { Pictogram } from 'src/pictogram/entities/pictogram.entity';
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Check,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
+
+import { RoutineActivity } from './routine-activity.entity';
 
 @Entity()
+@Unique('UQ_routine_infant_day', ['infant', 'dayOfWeek'])
+@Check('CHK_routine_day', '"dayOfWeek" BETWEEN 1 AND 7')
 export class Routine {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Infant, (infant) => infant.routines)
+  @ManyToOne(() => Infant, (infant) => infant.routines, { nullable: false })
   infant: Infant;
 
-  @ManyToOne(() => Pictogram, (pictogram) => pictogram.routines)
-  pictogram: Pictogram;
-
-  @OneToMany(() => Routine, (routine) => routine.pictogram)
-  routines: Routine[];
-
-  @Column({ type: 'time' })
-  hour: string;
-
-  @Column()
+  // 1 = lunes, 7 = domingo.
+  @Column({ type: 'int' })
   dayOfWeek: number;
 
+  @OneToMany(() => RoutineActivity, (activity) => activity.routine)
+  activities: RoutineActivity[];
 }

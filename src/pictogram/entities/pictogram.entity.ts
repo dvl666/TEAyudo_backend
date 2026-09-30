@@ -1,7 +1,7 @@
 import { Category } from 'src/category/entities/category.entity';
 import { Infant } from 'src/infant/entities/infant.entity';
 import { PhrasePictogram } from 'src/phrase-pictogram/entities/phrase-pictogram.entity';
-import { Routine } from 'src/routine/entities/routine.entity';
+import { RoutineActivity } from 'src/routine/entities/routine-activity.entity';
 import { StoryScene } from 'src/story-scene/entities/story-scene.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
@@ -26,8 +26,8 @@ export class Pictogram {
   @ManyToOne(() => Category, (category) => category.pictograms)
   category: Category;
 
-  @OneToMany(() => Routine, (routine) => routine.pictogram)
-  routines: Routine[];
+  @OneToMany(() => RoutineActivity, (activity) => activity.pictogram)
+  routineActivities: RoutineActivity[];
 
   @ManyToOne(() => User, (user) => user.pictograms)
   user: User;
