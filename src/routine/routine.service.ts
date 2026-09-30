@@ -118,19 +118,22 @@ export class RoutineService {
             };
           }),
         );
+        const byStage = (stage: RoutineStage) =>
+          activities
+            .filter((activity) => activity.stage === stage)
+            .map(({ id, name, position, pictogram }) => ({
+              id,
+              name,
+              position,
+              pictogram,
+            }));
         return {
           id: routine.id,
           infantId,
           dayOfWeek: routine.dayOfWeek,
-          morning: activities.filter(
-            (activity) => activity.stage === RoutineStage.MORNING,
-          ),
-          afternoon: activities.filter(
-            (activity) => activity.stage === RoutineStage.AFTERNOON,
-          ),
-          night: activities.filter(
-            (activity) => activity.stage === RoutineStage.NIGHT,
-          ),
+          morning: byStage(RoutineStage.MORNING),
+          afternoon: byStage(RoutineStage.AFTERNOON),
+          night: byStage(RoutineStage.NIGHT),
         };
       }),
     );
