@@ -203,14 +203,14 @@ export class RoutineService {
     };
   }
 
-  removeActivity(
-    _routineId: string,
-    _activityId: string,
-    _userId: string,
-  ): never {
-    throw new NotImplementedException(
-      'Activity deletion is not implemented yet',
-    );
+  async removeActivity(routineId: string, activityId: string): Promise<void> {
+    const result = await this.activityRepository.delete({
+      id: activityId,
+      routine: { id: routineId },
+    });
+    if (!result.affected) {
+      throw new NotFoundException('La actividad no existe en esta rutina');
+    }
   }
 
   async findByRoutineId(routineId: string): Promise<Routine> {

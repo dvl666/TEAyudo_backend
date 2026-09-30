@@ -80,13 +80,12 @@ export class RoutineController {
     return this.routineService.findByRoutineId(routineId);
   }
 
-  // @Delete(':routineId/activities/:activityId')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // removeActivity(
-  //   @Param('routineId', ParseUUIDPipe) routineId: string,
-  //   @Param('activityId', ParseUUIDPipe) activityId: string,
-  //   @GetUser('id') userId: string,
-  // ) {
-  //   return this.routineService.removeActivity(routineId, activityId, userId);
-  // }
+  @Delete(':routineId/activities/:activityId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeActivity(
+    @Param('routineId', ParseUUIDPipe) routineId: string,
+    @Param('activityId', ParseUUIDPipe) activityId: string,
+  ) {
+    return this.routineService.removeActivity(routineId, activityId);
+  }
 }
