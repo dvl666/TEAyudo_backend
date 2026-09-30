@@ -168,12 +168,39 @@ export class RoutineService {
     return this.activityRepository.save(activity);
   }
 
-  updateActivity(
-    _routineId: string,
-    _activityId: string,
-    _dto: UpdateRoutineActivityDto,
-  ): never {
-    throw new NotImplementedException('Activity update is not implemented yet');
+  async updateActivity(
+    routineId: string,
+    activityId: string,
+    dto: UpdateRoutineActivityDto,
+  ) {
+    const activity = await this.activityRepository.findOne({
+      where: { id: activityId, routine: { id: routineId } },
+      relations: { pictogram: true },
+    });
+    if (!activity) {
+      throw new NotFoundException('La actividad no existe en esta rutina');
+    }
+
+    if (dto.pictogramId !== undefined) {
+      await this.pictogramService.findOne(dto.pictogramId);
+    }
+    const pictogramId = dto.pictogramId ?? activity.pictogram.id;
+    // Guardar solo la referencia al pictograma, no su URL firmada.
+    const updated = await this.activityRepository.save({
+      id: activity.id,
+      name: dto.name !== undefined ? dto.name.trim() : activity.name,
+      stage: dto.stage ?? activity.stage,
+      position: dto.position ?? activity.position,
+      pictogram: { id: pictogramId },
+    });
+    return {
+      id: updated.id,
+      routineId,
+      name: updated.name,
+      stage: updated.stage,
+      position: updated.position,
+      pictogramId,
+    };
   }
 
   removeActivity(
