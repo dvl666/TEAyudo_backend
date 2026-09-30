@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -30,6 +31,12 @@ export class StorageController {
       file.originalname,
       file.mimetype,
     );
+  }
+
+  @Get('url')
+  async getUrlByQuery(@Query('key') key: string) {
+    if (!key) throw new BadRequestException('El parámetro key es requerido');
+    return { url: await this.storageService.getSignedUrl(key) };
   }
 
   @Get(':key/url')

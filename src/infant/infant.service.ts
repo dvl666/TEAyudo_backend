@@ -22,22 +22,39 @@ export class InfantService {
     private readonly storageService: StorageService,
   ) {}
 
+  private async withSignedAvatar(infant: Infant): Promise<Infant> {
+    if (infant.avatarUrl && infant.avatarUrl.startsWith('avatars/')) {
+      try {
+        const signedUrl = await this.storageService.getSignedUrl(infant.avatarUrl);
+        return {
+          ...infant,
+          avatarUrl: signedUrl,
+        };
+      } catch (err) {
+        console.error(`Error al firmar avatar para infante ${infant.id}:`, err);
+      }
+    }
+    return infant;
+  }
+
   async create(createInfantDto: CreateInfantDto): Promise<Infant> {
     const user = await this.userService.findOne(createInfantDto.userId);
     const { userId, ...infantData } = createInfantDto;
     const infant = this.infantRepository.create(infantData);
     infant.users = [user!];
-    return this.infantRepository.save(infant);
+    const saved = await this.infantRepository.save(infant);
+    return this.withSignedAvatar(saved);
   }
 
-  findAll(): Promise<Infant[]> {
-    return this.infantRepository.find();
+  async findAll(): Promise<Infant[]> {
+    const infants = await this.infantRepository.find();
+    return Promise.all(infants.map((i) => this.withSignedAvatar(i)));
   }
 
   async findOne(id: string): Promise<Infant> {
     const infant = await this.infantRepository.findOne({ where: { id } });
     if (!infant) throw new NotFoundException(`Infant with id ${id} not found`);
-    return infant;
+    return this.withSignedAvatar(infant);
   }
 
   async update(id: string, updateInfantDto: UpdateInfantDto): Promise<Infant> {
@@ -45,8 +62,9 @@ export class InfantService {
     const updatedInfant = {
       ...infant,
       ...updateInfantDto,
-    }
-    return this.infantRepository.save(updatedInfant);
+    };
+    const saved = await this.infantRepository.save(updatedInfant);
+    return this.withSignedAvatar(saved);
   }
 
   async uploadAvatar(id: string, file: InfantAvatarFile): Promise<Record<string, unknown>> {
