@@ -66,6 +66,14 @@ export class StorageService implements OnModuleInit {
   }
 
   getSignedUrl(key: string, expiresIn = 3600): Promise<string> {
+    const cloudfrontUrl = process.env.CLOUDFRONT_URL;
+    if (cloudfrontUrl) {
+      const baseUrl = cloudfrontUrl.startsWith('http')
+        ? cloudfrontUrl
+        : `https://${cloudfrontUrl}`;
+      return Promise.resolve(`${baseUrl.replace(/\/$/, '')}/${key}`);
+    }
+
     const responseContentType = this.getImageContentType(key);
     return getSignedUrl(
       this.client,
