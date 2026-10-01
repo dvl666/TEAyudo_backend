@@ -62,13 +62,7 @@ export class PictogramService {
     }
   }
 
-  async findAll(): Promise<Record<string, unknown>[]> {
-    const pictograms = await this.pictogramRepository.find({
-      relations: { category: true },
-    });
-    return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
-  }
-
+  
   async findOne(id: string): Promise<Record<string, unknown>> {
     const pictogram = await this.pictogramRepository.findOne({
       where: { id },
@@ -78,6 +72,35 @@ export class PictogramService {
       throw new NotFoundException(`Pictogram with ID ${id} not found`);
     }
     return this.withSignedImage(pictogram);
+  }
+
+  async findAllPublic(): Promise<Record<string, unknown>[]> {
+    const pictograms = await this.pictogramRepository.find({
+      where: { personal: false },
+      relations: { category: true, infant: true },
+    });
+    return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
+  }
+
+  async findPictogramByInfantId(infantId: string): Promise<Pictogram[]> {
+    const pictograms = await this.pictogramRepository.find({
+      where: { infant: { id: infantId }, personal: true },
+      relations: { category: true },
+    });
+    return pictograms;
+  }
+
+  async findPublicAndPersonalPictograms(infantId: string) {
+    const privatePictograms = await this.findPictogramByInfantId(infantId);
+    const publicPictograms = await this.findAllPublic();
+    return [...privatePictograms, ...publicPictograms];
+  }
+
+  async findAllByTutorId(tutorId: string): Promise<Pictogram[]> {
+    return this.pictogramRepository.find({
+      where: { user: { id: tutorId } },
+      relations: { category: true, infant: true },
+    });
   }
 
   async findByCategory(categoryId: string): Promise<Record<string, unknown>[]> {
@@ -96,9 +119,6 @@ export class PictogramService {
     updatedDto: UpdatePictogramDto,
   ): Promise<Record<string, unknown>> {
     const pictogram = await this.findOne(id);
-
-    if (!pictogram)
-      throw new NotFoundException(`Pictogram with ID ${id} not found`);
 
     //Preguntar esta parte
     // const { categoryId, userId, infantId, ...pictogramData } = updatedDto;

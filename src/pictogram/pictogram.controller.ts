@@ -41,12 +41,22 @@ export class PictogramController {
 
   @Get()
   findAll() {
-    return this.pictogramService.findAll();
+    return this.pictogramService.findAllPublic();
+  }
+
+  @Get(':infantId')
+  findPictogramsByInfantId(@Param('infantId', new ParseUUIDPipe()) infantId: string) {
+    return this.pictogramService.findPictogramByInfantId(infantId);
   }
 
   @Get('category/:categoryId')
   findByCategory(@Param('categoryId', new ParseUUIDPipe()) categoryId: string) {
     return this.pictogramService.findByCategory(categoryId);
+  }
+
+  @Get('tutor/:tutorId')
+  findAllByTutorId(@Param('tutorId', new ParseUUIDPipe()) tutorId: string) {
+    return this.pictogramService.findAllByTutorId(tutorId);
   }
 
   @Patch(':id')
