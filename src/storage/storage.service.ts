@@ -66,20 +66,31 @@ export class StorageService implements OnModuleInit {
   }
 
   getSignedUrl(key: string, expiresIn = 3600): Promise<string> {
+    if (!key) return Promise.resolve('');
+
+    // Extraer solo la key limpia si venía como URL completa
+    let cleanKey = key;
+    if (cleanKey.includes('.amazonaws.com/')) {
+      cleanKey = cleanKey.split('.amazonaws.com/')[1].split('?')[0];
+    } else if (cleanKey.includes('.cloudfront.net/')) {
+      cleanKey = cleanKey.split('.cloudfront.net/')[1].split('?')[0];
+    }
+    cleanKey = cleanKey.replace(/^\//, '');
+
     const cloudfrontUrl = process.env.CLOUDFRONT_URL;
     if (cloudfrontUrl) {
       const baseUrl = cloudfrontUrl.startsWith('http')
         ? cloudfrontUrl
         : `https://${cloudfrontUrl}`;
-      return Promise.resolve(`${baseUrl.replace(/\/$/, '')}/${key}`);
+      return Promise.resolve(`${baseUrl.replace(/\/$/, '')}/${cleanKey}`);
     }
 
-    const responseContentType = this.getImageContentType(key);
+    const responseContentType = this.getImageContentType(cleanKey);
     return getSignedUrl(
       this.client,
       new GetObjectCommand({
         Bucket: this.bucket,
-        Key: key,
+        Key: cleanKey,
         ResponseContentDisposition: 'inline',
         ResponseContentType: responseContentType,
       }),

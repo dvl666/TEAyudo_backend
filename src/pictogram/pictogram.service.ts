@@ -82,12 +82,12 @@ export class PictogramService {
     return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
-  async findPictogramByInfantId(infantId: string): Promise<Pictogram[]> {
+  async findPictogramByInfantId(infantId: string): Promise<Record<string, unknown>[]> {
     const pictograms = await this.pictogramRepository.find({
       where: { infant: { id: infantId }, personal: true },
       relations: { category: true },
     });
-    return pictograms;
+    return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
   async findPublicAndPersonalPictograms(infantId: string) {
@@ -96,11 +96,12 @@ export class PictogramService {
     return [...privatePictograms, ...publicPictograms];
   }
 
-  async findAllByTutorId(tutorId: string): Promise<Pictogram[]> {
-    return this.pictogramRepository.find({
+  async findAllByTutorId(tutorId: string): Promise<Record<string, unknown>[]> {
+    const pictograms = await this.pictogramRepository.find({
       where: { user: { id: tutorId } },
       relations: { category: true, infant: true },
     });
+    return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
   async findByCategory(categoryId: string): Promise<Record<string, unknown>[]> {
