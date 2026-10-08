@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Category } from '../category/entities/category.entity';
+import { ArrayContains, Repository } from 'typeorm';
 import { StorageService } from '../storage/storage.service';
 import { CreatePictogramDto } from './dtos/create-pictogram.dto';
 import { Pictogram } from './entities/pictogram.entity';
@@ -28,15 +27,12 @@ export class PictogramService {
     private readonly infantService: InfantService,
   ) {}
 
-  async create(
-    dto: CreatePictogramDto,
-    file: PictogramImageFile,
-  ): Promise<Record<string, unknown>> {
+  async create( dto: CreatePictogramDto, file: PictogramImageFile ): Promise<Record<string, unknown>> {
     await this.categoryService.findOne(dto.categoryId);
 
     const user: any = await this.userService.findOne(dto.userId);
 
-    const infant = await this.infantService.findOne(dto.infantId);
+    await Promise.all(dto.infantId.map((id) => this.infantService.findOne(id)));
 
     const uploaded = await this.storageService.upload(
       file.buffer,
@@ -52,8 +48,9 @@ export class PictogramService {
         pictoImageUrl: uploaded.key,
         category: { id: dto.categoryId },
         user: user ?? undefined,
-        infant: infant ?? undefined,
+        infantId: dto.infantId,
       });
+
       const saved = await this.pictogramRepository.save(pictogram);
       return this.withSignedImage(saved);
     } catch (error) {
@@ -62,45 +59,47 @@ export class PictogramService {
     }
   }
 
-  
   async findOne(id: string): Promise<Record<string, unknown>> {
     const pictogram = await this.pictogramRepository.findOne({
       where: { id },
       relations: { category: true },
     });
-    if (!pictogram) {
-      throw new NotFoundException(`Pictogram with ID ${id} not found`);
-    }
+    if (!pictogram) throw new NotFoundException(`Pictogram with ID ${id} not found`);
+    
     return this.withSignedImage(pictogram);
   }
 
   async findAllPublic(): Promise<Record<string, unknown>[]> {
     const pictograms = await this.pictogramRepository.find({
       where: { personal: false },
-      relations: { category: true, infant: true },
-    });
-    return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
-  }
-
-  async findPictogramByInfantId(infantId: string): Promise<Record<string, unknown>[]> {
-    const pictograms = await this.pictogramRepository.find({
-      where: { infant: { id: infantId }, personal: true },
       relations: { category: true },
     });
+
     return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
-  async findPublicAndPersonalPictograms(infantId: string) {
+  async findPictogramByInfantId( infantId: string ): Promise<Record<string, unknown>[]> {
+    const pictograms = await this.pictogramRepository.find({
+      where: { infantId: ArrayContains([infantId]), personal: true },
+      relations: { category: true },
+    });
+
+    return Promise.all(pictograms.map(( item ) => this.withSignedImage(item)));
+  }
+
+  async findPublicAndPersonalPictograms( infantId: string ) {
     const privatePictograms = await this.findPictogramByInfantId(infantId);
     const publicPictograms = await this.findAllPublic();
+
     return [...privatePictograms, ...publicPictograms];
   }
 
-  async findAllByTutorId(tutorId: string): Promise<Record<string, unknown>[]> {
+  async findAllByTutorId( tutorId: string ): Promise<Record<string, unknown>[]> {
     const pictograms = await this.pictogramRepository.find({
       where: { user: { id: tutorId } },
-      relations: { category: true, infant: true },
+      relations: { category: true },
     });
+
     return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
@@ -119,26 +118,28 @@ export class PictogramService {
     id: string,
     updatedDto: UpdatePictogramDto,
   ): Promise<Record<string, unknown>> {
-    const pictogram = await this.findOne(id);
-
-    //Preguntar esta parte
-    // const { categoryId, userId, infantId, ...pictogramData } = updatedDto;
+    const pictogram = await this.pictogramRepository.findOne({ where: { id } });
+    if (!pictogram)
+      throw new NotFoundException(`Pictogram with ID ${id} not found`);
     const { categoryId, ...pictogramData } = updatedDto;
-
     if (categoryId !== undefined)
       pictogram.category = (await this.categoryService.findOne(categoryId))!;
-    // if (userId !== undefined) pictogram.user = (await this.userService.findOne(userId))!;
-    // if (infantId !== undefined) pictogram.infant = await this.infantService.findOne(infantId);
-
-    const updatedPictogram = {
-      ...pictogram,
-      ...updatedDto,
-    };
-
+    if (pictogramData.infantId !== undefined) {
+      await Promise.all(
+        pictogramData.infantId.map((infantId) =>
+          this.infantService.findOne(infantId),
+        ),
+      );
+    }
+    const updatedPictogram = { ...pictogram, ...pictogramData };
     const saved = await this.pictogramRepository.save(updatedPictogram);
     return this.withSignedImage(saved);
   }
 
+  ///////////////////////////////
+  //STORAGE SERVICE FOR IMAGES//
+  /////////////////////////////
+  
   async updateImage(
     id: string,
     file: PictogramImageFile,
