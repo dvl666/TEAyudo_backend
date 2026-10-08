@@ -1,5 +1,7 @@
 import { Transform } from 'class-transformer';
 import {
+  ArrayUnique,
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsOptional,
@@ -26,7 +28,9 @@ export class CreatePictogramDto {
 
   @IsUUID()
   userId: string;
-  
-  @IsUUID()
-  infantId: string;
+
+  @IsArray()
+  @IsUUID('4', { each: true })
+  @ArrayUnique()
+  infantId: string[];
 }
