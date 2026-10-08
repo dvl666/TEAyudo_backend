@@ -1,10 +1,15 @@
 import { Category } from 'src/category/entities/category.entity';
-import { Infant } from 'src/infant/entities/infant.entity';
 import { PhrasePictogram } from 'src/phrase-pictogram/entities/phrase-pictogram.entity';
 import { RoutineActivity } from 'src/routine/entities/routine-activity.entity';
 import { StoryScene } from 'src/story-scene/entities/story-scene.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class Pictogram {
@@ -32,10 +37,13 @@ export class Pictogram {
   @ManyToOne(() => User, (user) => user.pictograms)
   user: User;
 
-  @ManyToOne(() => Infant, (infant) => infant.pictograms)
-  infant: Infant;
+  @Column('uuid', { array: true, default: () => "'{}'::uuid[]" })
+  infantId: string[];
 
-  @OneToMany(() => PhrasePictogram, (phrasePictogram) => phrasePictogram.pictogram)
+  @OneToMany(
+    () => PhrasePictogram,
+    (phrasePictogram) => phrasePictogram.pictogram,
+  )
   phrasePictograms: PhrasePictogram[];
 
   @OneToMany(() => StoryScene, (storyScene) => storyScene.correctPictogram)
