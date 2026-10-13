@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArrayContains, Repository } from 'typeorm';
 import { StorageService } from '../storage/storage.service';
+import { ModerationService } from '../storage/moderation.service';
 import { CreatePictogramDto } from './dtos/create-pictogram.dto';
 import { Pictogram } from './entities/pictogram.entity';
 import { CategoryService } from 'src/category/category.service';
@@ -22,6 +23,7 @@ export class PictogramService {
     private readonly pictogramRepository: Repository<Pictogram>,
 
     private readonly storageService: StorageService,
+    private readonly moderationService: ModerationService,
     private readonly categoryService: CategoryService,
     private readonly userService: UserService,
     private readonly infantService: InfantService,
@@ -33,6 +35,9 @@ export class PictogramService {
     const user: any = await this.userService.findOne(dto.userId);
 
     await Promise.all(dto.infantId.map((id) => this.infantService.findOne(id)));
+
+    // 1. Validar la imagen con AWS Rekognition antes de subir a S3
+    await this.moderationService.validateImageBuffer(file.buffer);
 
     const uploaded = await this.storageService.upload(
       file.buffer,
@@ -148,6 +153,9 @@ export class PictogramService {
     if (!pictogram) {
       throw new NotFoundException(`Pictogram with ID ${id} not found`);
     }
+
+    // Validar la imagen con AWS Rekognition antes de subir a S3
+    await this.moderationService.validateImageBuffer(file.buffer);
 
     const previousImageKey = pictogram.pictoImageUrl;
     const uploaded = await this.storageService.upload(
