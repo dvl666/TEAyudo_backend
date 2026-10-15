@@ -15,4 +15,7 @@ export class Category {
 
   @OneToMany(() => GameProgress, (gameProgress) => gameProgress.categoryPlayed)
   gameProgresses: GameProgress[];
+
+  @Column({ default: '#000000'})
+  color: string;
 }
