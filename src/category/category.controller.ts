@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dtos/create-category.dto';
+import { UpdateCategoryDto } from './dtos/update-category.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -23,6 +24,14 @@ export class CategoryController {
   @Post()
   create(@Body() categoryData: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(categoryData);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
+    return this.categoryService.update(id, updateCategoryDto);
   }
 
 }

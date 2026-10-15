@@ -26,4 +26,13 @@ export class CategoryService {
         const category = this.categoryRepository.create(createCategoryDto);
         return this.categoryRepository.save(category);
     }
+
+    async update(id: string, updateCategoryDto: Partial<CreateCategoryDto>): Promise<Category> {
+        const category = await this.findOne(id);
+        var updatedCategory = { 
+            ...category, 
+            ...updateCategoryDto 
+        };
+        return await this.categoryRepository.save(updatedCategory);
+    }
 }
