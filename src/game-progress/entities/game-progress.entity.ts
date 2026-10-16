@@ -24,6 +24,6 @@ export class GameProgress {
   @Column()
   correctAnswers: number;
 
-  @Column()
+  @Column({ default: 5 })
   totalAnswers: number;
 }
