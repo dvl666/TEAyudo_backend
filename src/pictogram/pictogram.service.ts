@@ -141,6 +141,26 @@ export class PictogramService {
     return this.withSignedImage(saved);
   }
 
+  async find20ByCategory(
+    categoryId: string,
+  ): Promise<Record<string, unknown>[]> {
+    await this.categoryService.findOne(categoryId);
+
+    const pictograms = await this.pictogramRepository.find({
+      where: {
+        category: { id: categoryId },
+        personal: false,
+      },
+      relations: { category: true },
+      order: { id: 'ASC' },
+      take: 20,
+   });
+
+    return Promise.all(
+      pictograms.map((pictogram) => this.withSignedImage(pictogram)),
+    );
+  }
+
   ///////////////////////////////
   //STORAGE SERVICE FOR IMAGES//
   /////////////////////////////
