@@ -7,8 +7,8 @@ export class StoryScene {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Game, (game) => game.storyScenes)
-  game: Game;
+  // @ManyToOne(() => Game, (game) => game.storyScenes)
+  // game: Game;
 
   @ManyToOne(() => Pictogram, (pictogram) => pictogram.storyScenes)
   correctPictogram: Pictogram;
