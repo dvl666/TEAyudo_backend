@@ -7,18 +7,18 @@ export class Game {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  userId: string;
+  // @Column()
+  // userId: string;
 
   @Column()
   name: string;
 
   @Column()
-  type: string;
+  description: string;
 
   @OneToMany(() => GameProgress, (progress) => progress.game)
   progress: GameProgress[];
 
-  @OneToMany(() => StoryScene, (scene) => scene.game)
-  storyScenes: StoryScene[];
+  // @OneToMany(() => StoryScene, (scene) => scene.game)
+  // storyScenes: StoryScene[];
 }
