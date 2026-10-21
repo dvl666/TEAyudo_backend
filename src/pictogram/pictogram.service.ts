@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArrayContains, Repository } from 'typeorm';
 import { StorageService } from '../storage/storage.service';
@@ -9,11 +9,20 @@ import { CategoryService } from 'src/category/category.service';
 import { UserService } from 'src/user/user.service';
 import { InfantService } from 'src/infant/infant.service';
 import { UpdatePictogramDto } from './dtos/update-pictogram.dto';
+import { WhatItIsRound } from 'src/game/interfaces/what-it-is/round.interface';
+import { PictogramImageSigned } from './interfaces/pictogram-image-sign.interface';
 
 export interface PictogramImageFile {
   buffer: Buffer;
   originalname: string;
   mimetype: string;
+}
+
+export interface PictogramRound {
+  round: number;
+  prompt: string;
+  correctPictogramId: string;
+  pictograms: PictogramImageSigned[];
 }
 
 @Injectable()
@@ -29,12 +38,12 @@ export class PictogramService {
     private readonly infantService: InfantService,
   ) {}
 
-  async create( dto: CreatePictogramDto, file: PictogramImageFile ): Promise<Record<string, unknown>> {
+  async create( dto: CreatePictogramDto, file: PictogramImageFile ): Promise<PictogramImageSigned> {
     await this.categoryService.findOne(dto.categoryId);
 
     const user: any = await this.userService.findOne(dto.userId);
 
-    await Promise.all(dto.infantId.map((id) => this.infantService.findOne(id)));
+    if (dto.infantId) await Promise.all(dto.infantId.map((id) => this.infantService.findOne(id)));
 
     // 1. Validar la imagen con AWS Rekognition antes de subir a S3
     await this.moderationService.validateImageBuffer(file.buffer);
@@ -64,7 +73,7 @@ export class PictogramService {
     }
   }
 
-  async findOne(id: string): Promise<Record<string, unknown>> {
+  async findOne(id: string): Promise<PictogramImageSigned> {
     const pictogram = await this.pictogramRepository.findOne({
       where: { id },
       relations: { category: true },
@@ -74,7 +83,7 @@ export class PictogramService {
     return this.withSignedImage(pictogram);
   }
 
-  async findAllPublic(): Promise<Record<string, unknown>[]> {
+  async findAllPublic(): Promise<PictogramImageSigned[]> {
     const pictograms = await this.pictogramRepository.find({
       where: { personal: false },
       relations: { category: true },
@@ -83,7 +92,7 @@ export class PictogramService {
     return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
-  async findPictogramByInfantId( infantId: string ): Promise<Record<string, unknown>[]> {
+  async findPictogramByInfantId( infantId: string ): Promise<PictogramImageSigned[]> {
     const pictograms = await this.pictogramRepository.find({
       where: { infantId: ArrayContains([infantId]), personal: true },
       relations: { category: true },
@@ -99,7 +108,7 @@ export class PictogramService {
     return [...privatePictograms, ...publicPictograms];
   }
 
-  async findAllByTutorId( tutorId: string ): Promise<Record<string, unknown>[]> {
+  async findAllByTutorId( tutorId: string ): Promise<PictogramImageSigned[]> {
     const pictograms = await this.pictogramRepository.find({
       where: { user: { id: tutorId } },
       relations: { category: true },
@@ -108,7 +117,7 @@ export class PictogramService {
     return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
-  async findByCategory(categoryId: string): Promise<Record<string, unknown>[]> {
+  async findByCategory(categoryId: string): Promise<PictogramImageSigned[]> {
     await this.categoryService.findOne(categoryId);
 
     const pictograms = await this.pictogramRepository.find({
@@ -122,7 +131,7 @@ export class PictogramService {
   async update(
     id: string,
     updatedDto: UpdatePictogramDto,
-  ): Promise<Record<string, unknown>> {
+  ): Promise<PictogramImageSigned> {
     const pictogram = await this.pictogramRepository.findOne({ where: { id } });
     if (!pictogram)
       throw new NotFoundException(`Pictogram with ID ${id} not found`);
@@ -143,7 +152,7 @@ export class PictogramService {
 
   async find20ByCategory(
     categoryId: string,
-  ): Promise<Record<string, unknown>[]> {
+  ): Promise<WhatItIsRound[]> {
     await this.categoryService.findOne(categoryId);
 
     const pictograms = await this.pictogramRepository.find({
@@ -154,11 +163,26 @@ export class PictogramService {
       relations: { category: true },
       order: { id: 'ASC' },
       take: 20,
-   });
+    });
 
-    return Promise.all(
+    if (pictograms.length < 20) throw new BadRequestException('La categoría debe tener al menos 20 pictogramas públicos para crear 5 rondas.')
+    
+
+    const signedPictograms = await Promise.all(
       pictograms.map((pictogram) => this.withSignedImage(pictogram)),
     );
+
+    return Array.from({ length: 5 }, (_, index) => {
+      const start = index * 4;
+      const correctPictogram = pictograms[start + Math.floor(Math.random() * 4)];
+
+      return {
+        round: index + 1,
+        prompt: correctPictogram.pictogramName,
+        correctPictogramId: correctPictogram.id,
+        pictograms: signedPictograms.slice(start, start + 4),
+      };
+    });
   }
 
   ///////////////////////////////
@@ -168,7 +192,7 @@ export class PictogramService {
   async updateImage(
     id: string,
     file: PictogramImageFile,
-  ): Promise<Record<string, unknown>> {
+  ): Promise<PictogramImageSigned> {
     const pictogram = await this.pictogramRepository.findOne({ where: { id } });
     if (!pictogram) {
       throw new NotFoundException(`Pictogram with ID ${id} not found`);
@@ -207,7 +231,7 @@ export class PictogramService {
 
   private async withSignedImage(
     pictogram: Pictogram,
-  ): Promise<Record<string, unknown>> {
+  ): Promise<PictogramImageSigned> {
     const key = pictogram.pictoImageUrl;
     return {
       ...pictogram,

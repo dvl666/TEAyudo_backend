@@ -2,7 +2,6 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dtos/create-game.dto';
 import { Game } from './entities/game.entity';
-import { PictogramService } from 'src/pictogram/pictogram.service';
 
 @Controller('game')
 export class GameController {
