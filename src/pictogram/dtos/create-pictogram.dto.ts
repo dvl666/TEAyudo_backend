@@ -32,5 +32,6 @@ export class CreatePictogramDto {
   @IsArray()
   @IsUUID('4', { each: true })
   @ArrayUnique()
-  infantId: string[];
+  @IsOptional()
+  infantId?: string[];
 }
