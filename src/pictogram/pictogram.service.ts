@@ -169,8 +169,7 @@ export class PictogramService {
       take: 20,
     });
 
-    if (pictograms.length < 20) throw new BadRequestException('La categoría debe tener al menos 20 pictogramas públicos para crear 5 rondas.')
-    
+    if (pictograms.length < 20) return this.find5ByCategory(categoryId);
 
     const signedPictograms = await Promise.all(
       pictograms.map((pictogram) => this.withSignedImage(pictogram)),
@@ -187,6 +186,36 @@ export class PictogramService {
         pictograms: signedPictograms.slice(start, start + 4),
       };
     });
+  }
+
+  async find5ByCategory(categoryId: string): Promise<WhatItIsRound[]> {
+    await this.categoryService.findOne(categoryId);
+
+    const pictograms = await this.pictogramRepository.find({
+      where: { category: { id: categoryId }, personal: false },
+      relations: { category: true },
+      order: { id: 'ASC' },
+      take: 5,
+    });
+
+    if (pictograms.length < 5) {
+      throw new BadRequestException(
+        'La categoría debe tener al menos 5 pictogramas públicos para crear 5 rondas.',
+      );
+    }
+
+    const signedPictograms = await Promise.all(
+      pictograms.map((pictogram) => this.withSignedImage(pictogram)),
+    );
+
+    return signedPictograms.map((pictogram, index) => ({
+      round: index + 1,
+      prompt: pictogram.pictogramName,
+      correctPictogramId: pictogram.id,
+      pictograms: signedPictograms.filter(
+        (_, optionIndex) => optionIndex !== (index + 1) % signedPictograms.length,
+      ),
+    }));
   }
 
   ///////////////////////////////

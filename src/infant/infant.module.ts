@@ -7,7 +7,11 @@ import { UserModule } from 'src/user/user.module';
 import { StorageModule } from 'src/storage/storage.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Infant]), UserModule, StorageModule],
+  imports: [
+    TypeOrmModule.forFeature([Infant]), 
+    UserModule, 
+    StorageModule
+  ],
   controllers: [InfantController],
   providers: [InfantService],
   exports: [InfantService],
