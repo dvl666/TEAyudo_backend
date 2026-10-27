@@ -11,6 +11,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InfantService } from './infant.service';
@@ -39,6 +40,14 @@ export class InfantController {
     @Body() updateInfantDto: UpdateInfantDto,
   ): Promise<Infant> {
     return this.infantService.update(id, updateInfantDto);
+  }
+
+  @Delete(':infantId')
+  async deleteInfante(
+    @Param( 'infantId', new ParseUUIDPipe() ) infantId : string
+  ) {
+    console.log(infantId)
+    return this.infantService.deleteInfant(infantId)
   }
 
   @Post(':id/avatar')
@@ -74,4 +83,6 @@ export class InfantController {
   ): Promise<Record<string, unknown>> {
     return this.infantService.uploadAvatar(id, file);
   }
+
+
 }
