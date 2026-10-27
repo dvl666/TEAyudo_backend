@@ -5,6 +5,7 @@ import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { UserService } from 'src/user/user.service';
 import { jwtConstants } from '../constants';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { IsStrongPassword } from 'class-validator';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy( Strategy ) {
@@ -15,9 +16,11 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<User> {
-    const { email, userId } = payload;
+  async validate(payload: JwtPayload): Promise<Partial<User>> {
+    const { email } = payload;
     if ( !email ) throw new UnauthorizedException('Token not valid');
-    return this.userService.findOneByEmail(email);
+    const user = await this.userService.findOneByEmail(email);
+    const { password, firstName, lastName, administrativePin, pictograms, infants, ...restUser } = user
+    return restUser;
   }
 }

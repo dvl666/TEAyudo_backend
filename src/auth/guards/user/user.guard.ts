@@ -21,14 +21,13 @@ export class UserRoleGuard implements CanActivate {
 
     const req = ctx.switchToHttp().getRequest();
     const user: User = req.user;
-    console.log(user)
 
     if ( !user ) throw new BadRequestException('No se a encontrado al user en la request')
 
-    if ( user.roles.includes(ValidRoles.ADMIN) ) return true
+    if ( user.roles.includes( ValidRoles.ADMIN ) ) return true
 
     for ( const role of user.roles ) {
-      if ( validRoles.includes(role) ) return true
+      if ( validRoles.includes( role ) ) return true
     }
 
     throw new UnauthorizedException(`Unauthorized request, you need a valid role: ${validRoles}`)
