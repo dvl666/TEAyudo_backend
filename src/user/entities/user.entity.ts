@@ -28,4 +28,7 @@ export class User {
   @ManyToMany(() => Infant, (infant) => infant.users)
   @JoinTable()
   infants: Infant[];
+
+  @Column('text', { array: true, default: ['user'] })
+  roles: string[];
 }
