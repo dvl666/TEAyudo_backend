@@ -43,11 +43,7 @@ export class PictogramService {
 
     const user: any = await this.userService.findOne(dto.userId);
 
-    const {
-      password,
-      administrativePin,
-      ...safeUser
-    } = user
+    if (dto.infantId) await Promise.all(dto.infantId.map((id) => this.infantService.findOne(id)));
 
     // 1. Validar la imagen con AWS Rekognition antes de subir a S3
     await this.moderationService.validateImageBuffer(file.buffer);
@@ -65,7 +61,7 @@ export class PictogramService {
         personal: dto.personal,
         pictoImageUrl: uploaded.key,
         category: { id: dto.categoryId },
-        user: safeUser ?? undefined,
+        user: user ?? undefined,
         infantId: dto.infantId,
       });
 
