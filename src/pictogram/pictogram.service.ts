@@ -40,10 +40,8 @@ export class PictogramService {
 
   async create( dto: CreatePictogramDto, file: PictogramImageFile ): Promise<PictogramImageSigned> {
     try {
-      console.log('1. Buscando categoria:', dto.categoryId);
       await this.categoryService.findOne(dto.categoryId);
 
-      console.log('2. Buscando usuario:', dto.userId);
       const user: any = await this.userService.findOne(dto.userId);
 
       const {
@@ -53,17 +51,14 @@ export class PictogramService {
       } = user;
 
       // 1. Validar la imagen con AWS Rekognition antes de subir a S3
-      console.log('4. Validando con Rekognition...');
       await this.moderationService.validateImageBuffer(file.buffer);
 
-      console.log('5. Subiendo a S3...');
       const uploaded = await this.storageService.upload(
         file.buffer,
         file.originalname,
         file.mimetype,
       );
 
-      console.log('6. Guardando en BD...');
       try {
         const pictogram = this.pictogramRepository.create({
           pictogramName: dto.pictogramName,
@@ -76,7 +71,6 @@ export class PictogramService {
         });
 
         const saved = await this.pictogramRepository.save(pictogram);
-        console.log('7. Pictograma guardado con exito. Firmando URL...');
         return await this.withSignedImage(saved);
       } catch (error) {
         await this.storageService.delete(uploaded.key).catch(() => undefined);
