@@ -29,6 +29,12 @@ export class ModerationService {
    */
   async validateImageBuffer(imageBuffer: Buffer, minConfidence = 60): Promise<void> {
     try {
+      console.log('4.1 Preparando comando DetectModerationLabelsCommand...', {
+        bufferSize: imageBuffer?.length,
+        isBuffer: Buffer.isBuffer(imageBuffer),
+        region: process.env.AWS_REGION ?? 'sa-east-1',
+      });
+
       const command = new DetectModerationLabelsCommand({
         Image: {
           Bytes: imageBuffer,
@@ -36,7 +42,21 @@ export class ModerationService {
         MinConfidence: minConfidence,
       });
 
-      const response = await this.client.send(command);
+      console.log('4.2 Enviando llamada a Rekognition Client (con timeout de 3s)...');
+      
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Rekognition timeout tras 3000ms')), 3000)
+      );
+
+      const response = await Promise.race([
+        this.client.send(command),
+        timeoutPromise,
+      ]);
+
+      console.log('4.3 Respuesta recibida de Rekognition:', {
+        labelsCount: response.ModerationLabels?.length ?? 0,
+      });
+
       const labels: ModerationLabel[] = response.ModerationLabels ?? [];
 
       if (labels.length > 0) {
@@ -60,6 +80,7 @@ export class ModerationService {
       if (error instanceof BadRequestException) {
         throw error;
       }
+      console.error('Error detallado en validateImageBuffer:', error);
       this.logger.error('Error al analizar la imagen con AWS Rekognition', error);
       // Si Rekognition falla por permisos o red, permitimos o manejamos según sea necesario
       // Opcional: podrías relanzar o dejar pasar dependiendo de cuán estricto se desee

@@ -34,10 +34,29 @@ async function bootstrap() {
   await app.init();
 
   const expressApp = app.getHttpAdapter().getInstance();
-  return serverlessExpress({ app: expressApp });
+  return serverlessExpress({
+    app: expressApp,
+    binarySettings: {
+      contentTypes: [
+        'multipart/form-data',
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+        'application/octet-stream',
+      ],
+    },
+  });
 }
 
 export const handler = async (event: any, context: Context) => {
+  console.log('Incoming Lambda Event:', {
+    httpMethod: event.httpMethod || event.requestContext?.http?.method,
+    path: event.path || event.rawPath,
+    headers: event.headers,
+    isBase64Encoded: event.isBase64Encoded,
+  });
+
   // Reutiliza la instancia de NestJS en memoria entre invocaciones (Warm Start)
   if (!cachedServer) {
     cachedServer = await bootstrap();
