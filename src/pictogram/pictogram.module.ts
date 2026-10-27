@@ -10,6 +10,7 @@ import { User } from '../user/entities/user.entity';
 import { CategoryModule } from 'src/category/category.module';
 import { UserModule } from 'src/user/user.module';
 import { InfantModule } from 'src/infant/infant.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { InfantModule } from 'src/infant/infant.module';
     CategoryModule,
     UserModule,
     InfantModule,
+    AuthModule
   ],
   controllers: [PictogramController],
   providers: [PictogramService],

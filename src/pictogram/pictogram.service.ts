@@ -87,6 +87,18 @@ export class PictogramService {
     return this.withSignedImage(pictogram);
   }
 
+  async pictogramBelongsToUser( pictogramId: string, userId:string ): Promise<Boolean> {
+    const pictogram = await this.pictogramRepository.findOne({
+      where: { 
+        id: pictogramId, 
+        user: { id: userId }
+      },
+    });
+
+    console.log(pictogram !== null)
+    return pictogram !== null
+  }
+
   async findAllPublic(): Promise<PictogramImageSigned[]> {
     const pictograms = await this.pictogramRepository.find({
       where: { personal: false },
