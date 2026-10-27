@@ -26,6 +26,6 @@ export class Infant {
   @OneToMany(() => GameProgress, (gameProgress) => gameProgress.infant)
   gameProgresses: GameProgress[];
 
-  @ManyToMany(() => User, (user) => user.infants)
+  @ManyToMany(() => User, (user) => user.infants, { onDelete: 'CASCADE' })
   users: User[];
 }
