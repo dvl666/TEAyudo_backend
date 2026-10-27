@@ -37,6 +37,12 @@ export class PictogramController {
     )
     file: PictogramImageFile,
   ) {
+    console.log('PictogramController.create called:', {
+      dto: createPictogramDto,
+      fileReceived: Boolean(file),
+      fileSize: file?.buffer?.length,
+      mimetype: file?.mimetype,
+    });
     return this.pictogramService.create(createPictogramDto, file);
   }
   
