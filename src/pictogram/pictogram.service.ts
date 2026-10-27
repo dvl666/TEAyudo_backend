@@ -39,37 +39,56 @@ export class PictogramService {
   ) {}
 
   async create( dto: CreatePictogramDto, file: PictogramImageFile ): Promise<PictogramImageSigned> {
-    await this.categoryService.findOne(dto.categoryId);
-
-    const user: any = await this.userService.findOne(dto.userId);
-
-    if (dto.infantId) await Promise.all(dto.infantId.map((id) => this.infantService.findOne(id)));
-
-    // 1. Validar la imagen con AWS Rekognition antes de subir a S3
-    await this.moderationService.validateImageBuffer(file.buffer);
-
-    const uploaded = await this.storageService.upload(
-      file.buffer,
-      file.originalname,
-      file.mimetype,
-    );
-
     try {
-      const pictogram = this.pictogramRepository.create({
-        pictogramName: dto.pictogramName,
-        description: dto.description,
-        personal: dto.personal,
-        pictoImageUrl: uploaded.key,
-        category: { id: dto.categoryId },
-        user: user ?? undefined,
-        infantId: dto.infantId,
-      });
+      console.log('1. Buscando categoria:', dto.categoryId);
+      await this.categoryService.findOne(dto.categoryId);
 
-      const saved = await this.pictogramRepository.save(pictogram);
-      return this.withSignedImage(saved);
-    } catch (error) {
-      await this.storageService.delete(uploaded.key).catch(() => undefined);
-      throw error;
+      console.log('2. Buscando usuario:', dto.userId);
+      const user: any = await this.userService.findOne(dto.userId);
+
+      if (dto.infantId) {
+        console.log('3. Validando infantes:', dto.infantId);
+        await Promise.all(dto.infantId.map((id) => this.infantService.findOne(id)));
+      }
+
+      // 1. Validar la imagen con AWS Rekognition antes de subir a S3
+      console.log('4. Validando con Rekognition...');
+      await this.moderationService.validateImageBuffer(file.buffer);
+
+      console.log('5. Subiendo a S3...');
+      const uploaded = await this.storageService.upload(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+      );
+
+      console.log('6. Guardando en BD...');
+      try {
+        const pictogram = this.pictogramRepository.create({
+          pictogramName: dto.pictogramName,
+          description: dto.description,
+          personal: dto.personal,
+          pictoImageUrl: uploaded.key,
+          category: { id: dto.categoryId },
+          user: user ?? undefined,
+          infantId: dto.infantId,
+        });
+
+        const saved = await this.pictogramRepository.save(pictogram);
+        console.log('7. Pictograma guardado con exito. Firmando URL...');
+        return await this.withSignedImage(saved);
+      } catch (error) {
+        await this.storageService.delete(uploaded.key).catch(() => undefined);
+        throw error;
+      }
+    } catch (err: any) {
+      console.error('ERROR EN PictogramService.create:', {
+        message: err?.message,
+        name: err?.name,
+        stack: err?.stack,
+        response: err?.response,
+      });
+      throw err;
     }
   }
 
