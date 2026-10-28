@@ -57,6 +57,15 @@ export class InfantService {
     return this.withSignedAvatar(infant);
   }
 
+  async findOneWithInfants( id: string ) {
+    const infant = await this.infantRepository.findOne({ 
+      where: { id },
+      relations: { users: true }
+    });
+    if (!infant) throw new NotFoundException(`Infant with id ${id} not found`);
+    return this.withSignedAvatar(infant);
+  }
+
   async update(id: string, updateInfantDto: UpdateInfantDto): Promise<Infant> {
     const infant = await this.findOne(id);
     const updatedInfant = {
