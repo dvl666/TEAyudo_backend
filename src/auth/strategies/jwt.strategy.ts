@@ -16,11 +16,12 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<Partial<User>> {
-    const { email } = payload;
-    if ( !email ) throw new UnauthorizedException('Token not valid');
-    const user = await this.userService.findOneByEmail(email);
-    const { password, firstName, lastName, administrativePin, pictograms, infants, ...restUser } = user
-    return restUser;
+  async validate(payload: JwtPayload): Promise<any> {
+    const { userId } = payload;
+    if ( !userId ) throw new UnauthorizedException('Token not valid');
+    const user = await this.userService.findOne(userId);
+    // console.log('hola', user)
+    // const { password, firstName, lastName, administrativePin, pictograms, infants, ...restUser } = user
+    return user;
   }
 }
