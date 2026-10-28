@@ -50,6 +50,12 @@ export class PictogramService {
         ...safeUser
       } = user;
 
+      await Promise.all(
+        (dto.infantId ?? []).map((infantId) =>
+          this.infantService.findOne(infantId),
+        ),
+      );
+
       // 1. Validar la imagen con AWS Rekognition antes de subir a S3
       await this.moderationService.validateImageBuffer(file.buffer);
 

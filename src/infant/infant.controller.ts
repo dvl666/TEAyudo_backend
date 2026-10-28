@@ -11,6 +11,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InfantService } from './infant.service';
@@ -86,4 +87,6 @@ export class InfantController {
   ): Promise<Record<string, unknown>> {
     return this.infantService.uploadAvatar( infantId, file) ;
   }
+
+
 }

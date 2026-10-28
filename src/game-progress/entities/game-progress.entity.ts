@@ -9,7 +9,7 @@ export class GameProgress {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Infant, (infant) => infant.gameProgresses)
+  @ManyToOne(() => Infant, (infant) => infant.gameProgresses, { onDelete: 'CASCADE' })
   infant: Infant;
 
   @ManyToOne(() => Game, (game) => game.progress)

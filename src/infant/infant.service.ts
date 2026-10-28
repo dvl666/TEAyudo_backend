@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Infant } from './entities/infant.entity';
 import { Repository } from 'typeorm';
+import { Pictogram } from 'src/pictogram/entities/pictogram.entity';
 import { CreateInfantDto } from './dtos/create-infant.dto';
 import { UserService } from 'src/user/user.service';
 import { StorageService } from 'src/storage/storage.service';
@@ -104,5 +105,21 @@ export class InfantService {
       await this.storageService.delete(uploaded.key).catch(() => undefined);
       throw error;
     }
+  }
+
+  async deleteInfant(infantId: string): Promise<void> {
+    await this.infantRepository.manager.transaction(async (manager) => {
+      const result = await manager.delete(Infant, infantId);
+      if (!result.affected) {
+        throw new NotFoundException('Infante no encontrado');
+      }
+
+      await manager
+        .createQueryBuilder()
+        .update(Pictogram)
+        .set({ infantId: () => 'array_remove("infantId", CAST(:infantId AS uuid))' })
+        .where('CAST(:infantId AS uuid) = ANY("infantId")', { infantId })
+        .execute();
+    });
   }
 }

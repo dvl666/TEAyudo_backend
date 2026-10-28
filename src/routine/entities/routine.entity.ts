@@ -18,7 +18,7 @@ export class Routine {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Infant, (infant) => infant.routines, { nullable: false })
+  @ManyToOne(() => Infant, (infant) => infant.routines, { nullable: false, onDelete: 'CASCADE' })
   infant: Infant;
 
   // 1 = lunes, 7 = domingo.
