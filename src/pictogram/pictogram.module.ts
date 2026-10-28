@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PictogramService } from './pictogram.service';
 import { PictogramController } from './pictogram.controller';
 import { Pictogram } from './entities/pictogram.entity';
@@ -17,8 +17,8 @@ import { AuthModule } from 'src/auth/auth.module';
     TypeOrmModule.forFeature([Pictogram]),
     StorageModule,
     CategoryModule,
-    UserModule,
-    InfantModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => InfantModule),
     AuthModule
   ],
   controllers: [PictogramController],
