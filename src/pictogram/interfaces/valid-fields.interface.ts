@@ -2,5 +2,6 @@
 export enum ValidFields {
     ID = 'id',
     TUTOR_ID = "tutorId",
-    PICTOGRAM_ID = "pictogramId"
+    PICTOGRAM_ID = "pictogramId",
+    INFANT_ID = "infantId"
 }
