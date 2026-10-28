@@ -11,53 +11,43 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { RoutineService } from './routine.service';
 import { CreateRoutineDto } from './create-routine.dto';
 import {
   CreateRoutineActivityDto,
   UpdateRoutineActivityDto,
 } from './routine-activity.dto';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface';
+import { Belongs } from 'src/decorators/belongs/belongs.decorator';
+import { ValidFields } from 'src/pictogram/interfaces/valid-fields.interface';
 
 @Controller('routine')
-// @UseGuards(AuthGuard('jwt'))
 export class RoutineController {
   constructor(private readonly routineService: RoutineService) {}
 
+  @Auth( ValidRoles.USER )
   @Post()
   create(@Body() createRoutineDto: CreateRoutineDto) {
     return this.routineService.create(createRoutineDto);
   }
 
+  @Belongs( ValidFields.INFANT_ID )
+  @Auth( ValidRoles.USER )
   @Get('infant/:infantId')
   findByInfant(@Param('infantId', ParseUUIDPipe) infantId: string) {
     console.log('infantId', infantId);
     return this.routineService.findByInfant(infantId);
   }
 
+  @Belongs( ValidFields.INFANT_ID )
+  @Auth( ValidRoles.USER )
   @Get('infant/:infantId/grouped')
   findGroupedByInfant(@Param('infantId', ParseUUIDPipe) infantId: string) {
     return this.routineService.findGroupedByInfant(infantId);
   }
 
-  // @Get(':id')
-  // findOne(
-  //   @Param('id', ParseUUIDPipe) id: string,
-  //   @GetUser('id') userId: string,
-  // ) {
-  //   return this.routineService.findOne(id, userId);
-  // }
-
-  // @Delete(':id')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // remove(
-  //   @Param('id', ParseUUIDPipe) id: string,
-  //   @GetUser('id') userId: string,
-  // ) {
-  //   return this.routineService.remove(id, userId);
-  // }
-
+  @Auth( ValidRoles.USER )
   @Post(':routineId/activities')
   addActivity(
     @Param('routineId', ParseUUIDPipe) routineId: string,
@@ -66,6 +56,7 @@ export class RoutineController {
     return this.routineService.addActivity(routineId, dto);
   }
 
+  @Auth( ValidRoles.USER )
   @Patch(':routineId/activities/:activityId')
   updateActivity(
     @Param('routineId', ParseUUIDPipe) routineId: string,
@@ -75,11 +66,13 @@ export class RoutineController {
     return this.routineService.updateActivity(routineId, activityId, dto);
   }
 
+  @Auth( ValidRoles.USER )
   @Get(':routineId')
   findByRoutineId(@Param('routineId', ParseUUIDPipe) routineId: string) {
     return this.routineService.findByRoutineId(routineId);
   }
 
+  @Auth( ValidRoles.USER )
   @Delete(':routineId/activities/:activityId')
   @HttpCode(HttpStatus.NO_CONTENT)
   removeActivity(
