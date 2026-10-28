@@ -2,23 +2,28 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { LoginDto } from './dtos/login.dto';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface';
+import { Belongs } from 'src/decorators/belongs/belongs.decorator';
+import { ValidFields } from 'src/pictogram/interfaces/valid-fields.interface';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Auth( ValidRoles.ADMIN )
   @Get()
   findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
-  @Get(':id')
+  @Belongs( ValidFields.TUTOR_ID )
+  @Auth( ValidRoles.USER )
+  @Get(':tutorId')
   findOne(
-    @Param('id') id: string,
+    @Param('tutorId') tutorId: string,
   ): Promise<User | null> {
-    console.log(`Fetching user with ID: ${id}`);
-    return this.userService.findOne(id);
+    return this.userService.findOne(tutorId);
   }
 
   @Post('/register')
@@ -26,21 +31,19 @@ export class UserController {
     return this.userService.create(userData);
   }
 
-  @Get(':id/infants')
+  @Belongs( ValidFields.TUTOR_ID )
+  @Auth( ValidRoles.USER )
+  @Get(':tutorId/infants')
   findOneUserWithInfants(
-    @Param('id') id: string,
+    @Param('tutorId') tutorId: string,
   ): Promise<User | null> {
-    return this.userService.findOneUserWithInfants(id);
+    return this.userService.findOneUserWithInfants(tutorId);
   }
 
-  // @Post('/login')
-  // login(@Body() loginDto: LoginDto): Promise<boolean> {
-  //   return this.userService.login(loginDto);
-  // }
-
-  @Post(':userId/validate-pin')
-  validateAdministrativePin( @Param('userId') userId: string, @Body('pin') pin: string ): Promise<boolean> {
-    return this.userService.validateAdministrativePin(userId, pin);
+  @Belongs( ValidFields.TUTOR_ID )
+  @Auth( ValidRoles.USER )
+  @Post(':tutorId/validate-pin')
+  validateAdministrativePin( @Param('tutorId') tutorId: string, @Body('pin') pin: string ): Promise<boolean> {
+    return this.userService.validateAdministrativePin(tutorId, pin);
   }
-
 }
