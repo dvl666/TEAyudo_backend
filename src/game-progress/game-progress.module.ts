@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { InfantModule } from 'src/infant/infant.module';
 import { GameModule } from 'src/game/game.module';
 import { CategoryModule } from 'src/category/category.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { PictogramModule } from 'src/pictogram/pictogram.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { CategoryModule } from 'src/category/category.module';
     InfantModule,
     GameModule,
     CategoryModule,
+    AuthModule,
+    PictogramModule
   ],
   controllers: [GameProgressController],
   providers: [GameProgressService],

@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { InfantModule } from 'src/infant/infant.module';
 import { PictogramModule } from 'src/pictogram/pictogram.module';
 import { StorageModule } from 'src/storage/storage.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { StorageModule } from 'src/storage/storage.module';
     InfantModule,
     PictogramModule,
     StorageModule,
+    AuthModule
   ],
   controllers: [RoutineController],
   providers: [RoutineService],
