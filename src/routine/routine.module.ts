@@ -8,6 +8,7 @@ import { InfantModule } from 'src/infant/infant.module';
 import { PictogramModule } from 'src/pictogram/pictogram.module';
 import { StorageModule } from 'src/storage/storage.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { AuthorizationModule } from 'src/authorization/authorization.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { AuthModule } from 'src/auth/auth.module';
     InfantModule,
     PictogramModule,
     StorageModule,
-    AuthModule
+    AuthModule,
+    AuthorizationModule
   ],
   controllers: [RoutineController],
   providers: [RoutineService],

@@ -19,8 +19,8 @@ import {
 } from './routine-activity.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface';
-import { Belongs } from 'src/decorators/belongs/belongs.decorator';
-import { ValidFields } from 'src/pictogram/interfaces/valid-fields.interface';
+import { Authorization } from 'src/authorization/decorators/authorization/authorization.decorator';
+import { AccessType } from 'src/authorization/interfaces/access-type.interface';
 
 @Controller('routine')
 export class RoutineController {
@@ -32,7 +32,7 @@ export class RoutineController {
     return this.routineService.create(createRoutineDto);
   }
 
-  @Belongs( ValidFields.INFANT_ID )
+  @Authorization( AccessType.INFANT )
   @Auth( ValidRoles.USER )
   @Get('infant/:infantId')
   findByInfant(@Param('infantId', ParseUUIDPipe) infantId: string) {
@@ -40,7 +40,7 @@ export class RoutineController {
     return this.routineService.findByInfant(infantId);
   }
 
-  @Belongs( ValidFields.INFANT_ID )
+  @Authorization( AccessType.INFANT )
   @Auth( ValidRoles.USER )
   @Get('infant/:infantId/grouped')
   findGroupedByInfant(@Param('infantId', ParseUUIDPipe) infantId: string) {
