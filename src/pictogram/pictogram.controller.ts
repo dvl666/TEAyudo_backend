@@ -19,8 +19,8 @@ import type { PictogramImageFile } from './pictogram.service';
 import { UpdatePictogramDto } from './dtos/update-pictogram.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface';
-import { ValidFields } from './interfaces/valid-fields.interface';
-import { Belongs } from '../decorators/belongs/belongs.decorator';
+import { Authorization } from 'src/authorization/decorators/authorization/authorization.decorator';
+import { AccessType } from 'src/authorization/interfaces/access-type.interface';
 
 @Controller( 'pictogram' )
 export class PictogramController {
@@ -52,14 +52,14 @@ export class PictogramController {
   }
   
   @Get(':infantId')
-  @Belongs( ValidFields.INFANT_ID )
+  @Authorization( AccessType.INFANT )
   @Auth( ValidRoles.USER )
   findPictogramsByInfantId( @Param( 'infantId', new ParseUUIDPipe() ) infantId: string ) {
     return this.pictogramService.findPublicAndPersonalPictograms( infantId );
   }
   
   @Get( '/search/pictogram/:pictogramId' )
-  @Belongs( ValidFields.PICTOGRAM_ID )
+  @Authorization( AccessType.PICTOGRAM )
   @Auth( ValidRoles.USER )
   findOne(@Param( 'pictogramId', new ParseUUIDPipe() ) pictogramId: string ) {
     console.log( 'Finding pictogram with ID:', pictogramId );
@@ -73,14 +73,14 @@ export class PictogramController {
   }
   
   @Get('tutor/:tutorId')
-  @Belongs( ValidFields.TUTOR_ID )
+  @Authorization( AccessType.SELF )
   @Auth( ValidRoles.USER )
   findAllByTutorId(@Param( 'tutorId', new ParseUUIDPipe() ) tutorId: string ) {
     return this.pictogramService.findAllByTutorId( tutorId );
   }
 
   @Patch(':pictogramId')
-  @Belongs( ValidFields.PICTOGRAM_ID )
+  @Authorization( AccessType.PICTOGRAM )
   @Auth( ValidRoles.USER )
   update(
     @Param('pictogramId', new ParseUUIDPipe()) pictogramId: string,
@@ -90,7 +90,7 @@ export class PictogramController {
   }
 
   @Patch(':pictogramId/image')
-  @Belongs( ValidFields.PICTOGRAM_ID )
+  @Authorization( AccessType.PICTOGRAM )
   @Auth( ValidRoles.USER )
   @UseInterceptors( FileInterceptor(' file' ) )
   updateImage(

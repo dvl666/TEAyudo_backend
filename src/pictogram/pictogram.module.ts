@@ -11,15 +11,17 @@ import { CategoryModule } from 'src/category/category.module';
 import { UserModule } from 'src/user/user.module';
 import { InfantModule } from 'src/infant/infant.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { AuthorizationModule } from 'src/authorization/authorization.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Pictogram]),
     StorageModule,
     CategoryModule,
-    forwardRef(() => UserModule),
-    forwardRef(() => InfantModule),
-    AuthModule
+    UserModule,
+    InfantModule,
+    AuthModule,
+    AuthorizationModule
   ],
   controllers: [PictogramController],
   providers: [PictogramService],
