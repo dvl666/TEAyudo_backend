@@ -27,6 +27,7 @@ import { StorageModule } from './storage/storage.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { AuthorizationModule } from './authorization/authorization.module';
+import { TtsModule } from './tts/tts.module';
 
 @Module({
   imports: [
@@ -74,7 +75,11 @@ import { AuthorizationModule } from './authorization/authorization.module';
     StorySceneModule,
     StorageModule,
     AuthModule,
+<<<<<<< HEAD
     AuthorizationModule,
+=======
+    TtsModule,
+>>>>>>> 46daeedf5ac32ed8e92ef2d821aeb009ca7c0620
   ],
   controllers: [AppController],
   providers: [AppService],
