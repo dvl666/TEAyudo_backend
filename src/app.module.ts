@@ -26,6 +26,7 @@ import { Category } from './category/entities/category.entity';
 import { StorageModule } from './storage/storage.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { TtsModule } from './tts/tts.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { AuthModule } from './auth/auth.module';
     StorySceneModule,
     StorageModule,
     AuthModule,
+    TtsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
