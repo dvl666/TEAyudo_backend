@@ -11,6 +11,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InfantService } from './infant.service';
@@ -85,5 +86,15 @@ export class InfantController {
     file: InfantAvatarFile,
   ): Promise<Record<string, unknown>> {
     return this.infantService.uploadAvatar( infantId, file) ;
+  }
+
+  @Authorization( AccessType.INFANT )
+  @Auth( ValidRoles.USER )
+  @Delete(':infantId')
+  async deleteInfante(
+    @Param( 'infantId', new ParseUUIDPipe() ) infantId : string
+  ) {
+    console.log(infantId)
+    return this.infantService.deleteInfant(infantId)
   }
 }
