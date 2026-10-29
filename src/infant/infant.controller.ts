@@ -86,6 +86,4 @@ export class InfantController {
   ): Promise<Record<string, unknown>> {
     return this.infantService.uploadAvatar( infantId, file) ;
   }
-
-
 }
