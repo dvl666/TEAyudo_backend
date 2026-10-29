@@ -51,9 +51,9 @@ export class PictogramController {
     return this.pictogramService.findAllPublic();
   }
   
-  @Get(':infantId')
+  @Get('/all/:infantId')
   @Authorization( AccessType.INFANT )
-  @Auth( ValidRoles.USER )
+  @Auth( ValidRoles.USER ) 
   findPictogramsByInfantId( @Param( 'infantId', new ParseUUIDPipe() ) infantId: string ) {
     return this.pictogramService.findPublicAndPersonalPictograms( infantId );
   }
