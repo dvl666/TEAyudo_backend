@@ -75,11 +75,8 @@ import { TtsModule } from './tts/tts.module';
     StorySceneModule,
     StorageModule,
     AuthModule,
-<<<<<<< HEAD
     AuthorizationModule,
-=======
     TtsModule,
->>>>>>> 46daeedf5ac32ed8e92ef2d821aeb009ca7c0620
   ],
   controllers: [AppController],
   providers: [AppService],
