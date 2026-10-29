@@ -6,13 +6,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { PictogramModule } from 'src/pictogram/pictogram.module';
 import { InfantModule } from 'src/infant/infant.module';
+import { AuthorizationModule } from 'src/authorization/authorization.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    forwardRef(() => AuthModule),
-    forwardRef(() => PictogramModule),
-    forwardRef(() => InfantModule),
+    AuthModule,
+    AuthorizationModule
   ],
   controllers: [UserController],
   providers: [UserService],
