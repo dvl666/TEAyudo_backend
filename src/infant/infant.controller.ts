@@ -11,7 +11,6 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
-  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InfantService } from './infant.service';
@@ -21,8 +20,8 @@ import type { InfantAvatarFile } from './infant.service';
 import { UpdateInfantDto } from './dtos/update-infant.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface';
-import { Belongs } from 'src/decorators/belongs/belongs.decorator';
-import { ValidFields } from 'src/pictogram/interfaces/valid-fields.interface';
+import { Authorization } from 'src/authorization/decorators/authorization/authorization.decorator';
+import { AccessType } from 'src/authorization/interfaces/access-type.interface';
 
 @Controller('infant')
 export class InfantController {
@@ -40,7 +39,7 @@ export class InfantController {
     return this.infantService.create(createInfantDto);
   }
 
-  @Belongs( ValidFields.INFANT_ID )
+  @Authorization( AccessType.INFANT )
   @Auth( ValidRoles.USER )
   @Patch(':infantId')
   update(
@@ -50,7 +49,7 @@ export class InfantController {
     return this.infantService.update( infantId, updateInfantDto );
   }
 
-  @Belongs( ValidFields.INFANT_ID )
+  @Authorization( AccessType.INFANT )
   @Auth( ValidRoles.USER )
   @Post(':infantId/avatar')
   @UseInterceptors(FileInterceptor('file'))
@@ -69,7 +68,7 @@ export class InfantController {
     return this.infantService.uploadAvatar( infantId, file );
   }
 
-  @Belongs( ValidFields.INFANT_ID )
+  @Authorization( AccessType.INFANT )
   @Auth( ValidRoles.USER )
   @Patch( ':infantId/avatar' )
   @UseInterceptors(FileInterceptor('file'))

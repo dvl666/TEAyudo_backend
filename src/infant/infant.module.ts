@@ -7,14 +7,15 @@ import { UserModule } from 'src/user/user.module';
 import { StorageModule } from 'src/storage/storage.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { PictogramModule } from 'src/pictogram/pictogram.module';
+import { AuthorizationModule } from 'src/authorization/authorization.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature( [Infant] ), 
-    forwardRef( () => UserModule ),
+    UserModule,
     StorageModule,
     AuthModule,
-    forwardRef( () => PictogramModule )
+    AuthorizationModule
   ],
   controllers: [InfantController],
   providers: [InfantService],
