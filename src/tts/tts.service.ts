@@ -12,28 +12,32 @@ import { SynthesizeSpeechDto } from './dto/synthesize-speech.dto';
 export class TtsService {
   private readonly logger = new Logger(TtsService.name);
 
+  // En AWS Lambda (detectado por AWS_LAMBDA_FUNCTION_NAME), no pasamos credenciales estáticas
+  // para que el SDK use automáticamente el Execution Role de IAM de la Lambda.
   private readonly client = new PollyClient({
     region:
       process.env.POLLY_REGION ??
       process.env.AWS_REGION ??
       'sa-east-1',
     credentials:
-      process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY
+      process.env.POLLY_ACCESS_KEY && process.env.POLLY_SECRET_KEY
+        ? {
+            accessKeyId: process.env.POLLY_ACCESS_KEY,
+            secretAccessKey: process.env.POLLY_SECRET_KEY,
+          }
+        : process.env.AWS_LAMBDA_FUNCTION_NAME
+        ? undefined
+        : process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY
         ? {
             accessKeyId: process.env.S3_ACCESS_KEY,
             secretAccessKey: process.env.S3_SECRET_KEY,
-          }
-        : process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-        ? {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
           }
         : undefined,
   });
 
   /**
-   * Sintetiza texto a voz utilizando Amazon Polly en modo Standard (compatible con sa-east-1).
-   * Utiliza por defecto la voz estándar en español 'Lucia' (o 'Conchita'/'Lupe').
+   * Sintetiza texto a voz utilizando Amazon Polly con la voz 'Lucia' en modo standard.
+   * Si falla, lanzará error y el frontend recurrirá automáticamente a la voz de Google (navegador).
    */
   async synthesize(dto: SynthesizeSpeechDto): Promise<{
     audioBase64: string;
@@ -46,46 +50,10 @@ export class TtsService {
       throw new BadRequestException('El texto a sintetizar no puede estar vacío');
     }
 
-    // Por defecto en sa-east-1 usamos motor standard y voz Lucia (muy nítida en español)
-    const voiceId = (dto.voiceId || 'Lucia') as VoiceId;
-    const engine: Engine = (dto.engine || 'standard') as Engine;
+    // Única voz de Polly: Lucia en motor standard
+    const voiceId: VoiceId = 'Lucia';
+    const engine: Engine = 'standard';
 
-    try {
-      return await this.executeSynthesis(text, voiceId, engine);
-    } catch (error) {
-      this.logger.warn(
-        `Error al sintetizar con voz ${voiceId} y motor ${engine}: ${error?.message}. Probando fallback a voz Lucia en standard...`,
-      );
-
-      // Si falló con la voz solicitada o con neural, intentamos con Lucia en standard
-      if (voiceId !== 'Lucia' || engine !== 'standard') {
-        try {
-          return await this.executeSynthesis(text, 'Lucia' as VoiceId, 'standard');
-        } catch (fallbackError) {
-          // Si Lucia fallase, intentamos Conchita
-          try {
-            return await this.executeSynthesis(text, 'Conchita' as VoiceId, 'standard');
-          } catch (thirdError) {
-            this.logger.error('Error total en síntesis de Polly en sa-east-1', thirdError);
-            throw thirdError;
-          }
-        }
-      }
-
-      throw error;
-    }
-  }
-
-  private async executeSynthesis(
-    text: string,
-    voiceId: VoiceId,
-    engine: Engine,
-  ): Promise<{
-    audioBase64: string;
-    mimeType: string;
-    voiceId: string;
-    engine: string;
-  }> {
     const command = new SynthesizeSpeechCommand({
       Text: text,
       OutputFormat: OutputFormat.MP3,
