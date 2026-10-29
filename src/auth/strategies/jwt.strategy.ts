@@ -20,8 +20,7 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
     const { userId } = payload;
     if ( !userId ) throw new UnauthorizedException('Token not valid');
     const user = await this.userService.findOne(userId);
-    // console.log('hola', user)
-    // const { password, firstName, lastName, administrativePin, pictograms, infants, ...restUser } = user
-    return user;
+    const { password, firstName, lastName, administrativePin, pictograms, infants, ...restUser } = user
+    return restUser;
   }
 }
