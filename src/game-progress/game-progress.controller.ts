@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { GameProgressService } from './game-progress.service';
 import { CreateGameProgressDto } from './dtos/create-game-progress.dto';
-import { Belongs } from 'src/decorators/belongs/belongs.decorator';
-import { ValidFields } from 'src/pictogram/interfaces/valid-fields.interface';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface';
+import { Authorization } from 'src/authorization/decorators/authorization/authorization.decorator';
+import { AccessType } from 'src/authorization/interfaces/access-type.interface';
 
 @Controller('game-progress')
 export class GameProgressController {
@@ -12,7 +12,7 @@ export class GameProgressController {
     private readonly gameProgressService: GameProgressService
   ) {}
 
-  @Belongs( ValidFields.INFANT_ID )
+  @Authorization( AccessType.INFANT )
   @Auth( ValidRoles.USER )
   @Get('infant/:infantId')
   getGameProgressByInfantId(@Param('infantId') infantId: string) {
