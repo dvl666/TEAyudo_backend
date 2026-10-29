@@ -36,7 +36,7 @@ export class TtsService {
   });
 
   /**
-   * Sintetiza texto a voz utilizando Amazon Polly con la voz 'Lucia' en modo standard.
+   * Sintetiza texto a voz utilizando Amazon Polly con la voz 'Mia' (es-MX) en modo standard.
    * Si falla, lanzará error y el frontend recurrirá automáticamente a la voz de Google (navegador).
    */
   async synthesize(dto: SynthesizeSpeechDto): Promise<{
@@ -50,8 +50,8 @@ export class TtsService {
       throw new BadRequestException('El texto a sintetizar no puede estar vacío');
     }
 
-    // Única voz de Polly: Lucia en motor standard
-    const voiceId: VoiceId = 'Lucia';
+    // Única voz de Polly: Mia (español de México) en motor standard
+    const voiceId: VoiceId = (dto.voiceId || 'Mia') as VoiceId;
     const engine: Engine = 'standard';
 
     const command = new SynthesizeSpeechCommand({

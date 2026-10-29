@@ -29,7 +29,7 @@ export class TtsController {
   @Get('voices')
   getRecommendedVoices() {
     return [
-      { id: 'Lucia', name: 'Lucía (Español - Femenina, estándar)', lang: 'es-ES', engine: 'standard' },
+      { id: 'Mia', name: 'Mia (México - Femenina, juvenil)', lang: 'es-MX', engine: 'standard' },
     ];
   }
 }
