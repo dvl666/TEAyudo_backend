@@ -32,9 +32,8 @@ export class TtsService {
   });
 
   /**
-   * Sintetiza texto a voz utilizando Amazon Polly.
-   * Por defecto utiliza la voz neural 'Mia' (es-MX), ideal para niños y entornos educativos.
-   * Si el motor neural falla o no está disponible en la región/voz, hace fallback automático al motor standard.
+   * Sintetiza texto a voz utilizando Amazon Polly en modo Standard (compatible con sa-east-1).
+   * Utiliza por defecto la voz estándar en español 'Lucia' (o 'Conchita'/'Lupe').
    */
   async synthesize(dto: SynthesizeSpeechDto): Promise<{
     audioBase64: string;
@@ -47,23 +46,29 @@ export class TtsService {
       throw new BadRequestException('El texto a sintetizar no puede estar vacío');
     }
 
-    const voiceId = (dto.voiceId || 'Mia') as VoiceId;
-    let preferredEngine = (dto.engine || 'neural') as Engine;
+    // Por defecto en sa-east-1 usamos motor standard y voz Lucia (muy nítida en español)
+    const voiceId = (dto.voiceId || 'Lucia') as VoiceId;
+    const engine: Engine = (dto.engine || 'standard') as Engine;
 
     try {
-      return await this.executeSynthesis(text, voiceId, preferredEngine);
+      return await this.executeSynthesis(text, voiceId, engine);
     } catch (error) {
       this.logger.warn(
-        `Error al sintetizar con motor ${preferredEngine}: ${error?.message}. Intentando fallback a standard...`,
+        `Error al sintetizar con voz ${voiceId} y motor ${engine}: ${error?.message}. Probando fallback a voz Lucia en standard...`,
       );
 
-      // Si falló con neural (ej. no soportado en la región o para esa voz específica), probamos con standard
-      if (preferredEngine === 'neural') {
+      // Si falló con la voz solicitada o con neural, intentamos con Lucia en standard
+      if (voiceId !== 'Lucia' || engine !== 'standard') {
         try {
-          return await this.executeSynthesis(text, voiceId, 'standard');
+          return await this.executeSynthesis(text, 'Lucia' as VoiceId, 'standard');
         } catch (fallbackError) {
-          this.logger.error('Error en fallback con motor standard de Polly', fallbackError);
-          throw fallbackError;
+          // Si Lucia fallase, intentamos Conchita
+          try {
+            return await this.executeSynthesis(text, 'Conchita' as VoiceId, 'standard');
+          } catch (thirdError) {
+            this.logger.error('Error total en síntesis de Polly en sa-east-1', thirdError);
+            throw thirdError;
+          }
         }
       }
 
