@@ -6,26 +6,21 @@ import { UserModule } from './user/user.module';
 import { InfantModule } from './infant/infant.module';
 import { CategoryModule } from './category/category.module';
 import { PictogramModule } from './pictogram/pictogram.module';
-import { PhraseModule } from './phrase/phrase.module';
-import { PhrasePictogramModule } from './phrase-pictogram/phrase-pictogram.module';
 import { GameModule } from './game/game.module';
 import { GameProgressModule } from './game-progress/game-progress.module';
 import { RoutineModule } from './routine/routine.module';
-import { StorySceneModule } from './story-scene/story-scene.module';
 import { User } from './user/entities/user.entity';
-import { StoryScene } from './story-scene/entities/story-scene.entity';
 import { Routine } from './routine/entities/routine.entity';
 import { RoutineActivity } from './routine/entities/routine-activity.entity';
 import { Game } from './game/entities/game.entity';
 import { Infant } from './infant/entities/infant.entity';
 import { Pictogram } from './pictogram/entities/pictogram.entity';
-import { Phrase } from './phrase/entities/phrase.entity';
-import { PhrasePictogram } from './phrase-pictogram/entities/phrase-pictogram.entity';
 import { GameProgress } from './game-progress/entities/game-progress.entity';
 import { Category } from './category/entities/category.entity';
 import { StorageModule } from './storage/storage.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { AuthorizationModule } from './authorization/authorization.module';
 import { TtsModule } from './tts/tts.module';
 
 @Module({
@@ -53,9 +48,6 @@ import { TtsModule } from './tts/tts.module';
         Game,
         Infant,
         Pictogram,
-        Phrase,
-        PhrasePictogram,
-        StoryScene,
         GameProgress,
         Category,
       ],
@@ -66,17 +58,16 @@ import { TtsModule } from './tts/tts.module';
     InfantModule,
     CategoryModule,
     PictogramModule,
-    PhraseModule,
-    PhrasePictogramModule,
     GameModule,
     GameProgressModule,
     RoutineModule,
-    StorySceneModule,
     StorageModule,
     AuthModule,
+    AuthorizationModule,
     TtsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
+
 export class AppModule {}

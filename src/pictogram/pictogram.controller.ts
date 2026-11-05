@@ -17,14 +17,19 @@ import { CreatePictogramDto } from './dtos/create-pictogram.dto';
 import { PictogramService } from './pictogram.service';
 import type { PictogramImageFile } from './pictogram.service';
 import { UpdatePictogramDto } from './dtos/update-pictogram.dto';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface';
+import { Authorization } from 'src/authorization/decorators/authorization/authorization.decorator';
+import { AccessType } from 'src/authorization/interfaces/access-type.interface';
 
-@Controller('pictogram')
+@Controller( 'pictogram' )
 export class PictogramController {
-  constructor(private readonly pictogramService: PictogramService) {}
-  
+  constructor(private readonly pictogramService: PictogramService) 
+  {}
   
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @Auth( ValidRoles.USER )
+  @UseInterceptors(FileInterceptor( 'file' ))
   create(
     @Body() createPictogramDto: CreatePictogramDto,
     @UploadedFile(
@@ -37,53 +42,59 @@ export class PictogramController {
     )
     file: PictogramImageFile,
   ) {
-    console.log('PictogramController.create called:', {
-      dto: createPictogramDto,
-      fileReceived: Boolean(file),
-      fileSize: file?.buffer?.length,
-      mimetype: file?.mimetype,
-    });
-    return this.pictogramService.create(createPictogramDto, file);
+    return this.pictogramService.create( createPictogramDto, file );
   }
   
   @Get()
+  @Auth( ValidRoles.ADMIN )
   findAll() {
     return this.pictogramService.findAllPublic();
   }
   
-  @Get(':infantId')
-  findPictogramsByInfantId(@Param('infantId', new ParseUUIDPipe()) infantId: string) {
-    return this.pictogramService.findPublicAndPersonalPictograms(infantId);
+  @Get('/all/:infantId')
+  @Authorization( AccessType.INFANT )
+  @Auth( ValidRoles.USER ) 
+  findPictogramsByInfantId( @Param( 'infantId', new ParseUUIDPipe() ) infantId: string ) {
+    return this.pictogramService.findPublicAndPersonalPictograms( infantId );
   }
   
-  @Get('/search/pictogram/:id')
-  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    console.log('Finding pictogram with ID:', id);
-    return this.pictogramService.findOne(id);
+  @Get( '/search/pictogram/:pictogramId' )
+  @Authorization( AccessType.PICTOGRAM )
+  @Auth( ValidRoles.USER )
+  findOne(@Param( 'pictogramId', new ParseUUIDPipe() ) pictogramId: string ) {
+    console.log( 'Finding pictogram with ID:', pictogramId );
+    return this.pictogramService.findOne( pictogramId );
   }
 
   @Get('category/:categoryId')
-  findByCategory(@Param('categoryId', new ParseUUIDPipe()) categoryId: string) {
-    return this.pictogramService.findByCategory(categoryId);
+  @Auth( ValidRoles.USER )
+  findByCategory(@Param( 'categoryId', new ParseUUIDPipe() ) categoryId: string ) {
+    return this.pictogramService.findByCategory( categoryId );
   }
   
   @Get('tutor/:tutorId')
-  findAllByTutorId(@Param('tutorId', new ParseUUIDPipe()) tutorId: string) {
-    return this.pictogramService.findAllByTutorId(tutorId);
+  @Authorization( AccessType.SELF )
+  @Auth( ValidRoles.USER )
+  findAllByTutorId(@Param( 'tutorId', new ParseUUIDPipe() ) tutorId: string ) {
+    return this.pictogramService.findAllByTutorId( tutorId );
   }
 
-  @Patch(':id')
+  @Patch(':pictogramId')
+  @Authorization( AccessType.PICTOGRAM )
+  @Auth( ValidRoles.USER )
   update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('pictogramId', new ParseUUIDPipe()) pictogramId: string,
     @Body() updatePictogramDto: UpdatePictogramDto,
   ) {
-    return this.pictogramService.update(id, updatePictogramDto);
+    return this.pictogramService.update( pictogramId, updatePictogramDto );
   }
 
-  @Patch(':id/image')
-  @UseInterceptors(FileInterceptor('file'))
+  @Patch(':pictogramId/image')
+  @Authorization( AccessType.PICTOGRAM )
+  @Auth( ValidRoles.USER )
+  @UseInterceptors( FileInterceptor(' file' ) )
   updateImage(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param( 'pictogramId', new ParseUUIDPipe() ) pictogramId: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -94,7 +105,7 @@ export class PictogramController {
     )
     file: PictogramImageFile,
   ) {
-    return this.pictogramService.updateImage(id, file);
+    return this.pictogramService.updateImage( pictogramId, file );
   }
 
 }

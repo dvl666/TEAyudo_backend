@@ -1,7 +1,5 @@
 import { Category } from 'src/category/entities/category.entity';
-import { PhrasePictogram } from 'src/phrase-pictogram/entities/phrase-pictogram.entity';
 import { RoutineActivity } from 'src/routine/entities/routine-activity.entity';
-import { StoryScene } from 'src/story-scene/entities/story-scene.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -39,13 +37,5 @@ export class Pictogram {
 
   @Column('uuid', { array: true, default: () => "'{}'::uuid[]" })
   infantId: string[];
-
-  @OneToMany(
-    () => PhrasePictogram,
-    (phrasePictogram) => phrasePictogram.pictogram,
-  )
-  phrasePictograms: PhrasePictogram[];
-
-  @OneToMany(() => StoryScene, (storyScene) => storyScene.correctPictogram)
-  storyScenes: StoryScene[];
+  
 }

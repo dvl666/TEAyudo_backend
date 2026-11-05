@@ -20,7 +20,7 @@ export class AuthService {
 
         return {
             ...user,
-            token: this.getJWT({ email: user.email, userId: user.id }),
+            token: this.getJWT({ email: user.email, userId: user.id, roles: user.roles }),
         }
 
     }
