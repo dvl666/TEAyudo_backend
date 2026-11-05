@@ -25,6 +25,32 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Almacenamiento local compatible con AWS S3 (MinIO)
+
+MinIO emula la API de S3 usada por la aplicación. Copia `.env.example` a `.env`,
+levanta los servicios y ejecuta el backend:
+
+```bash
+docker compose up -d
+npm run start:dev
+```
+
+La API S3 queda en `http://localhost:9000` y la consola de MinIO en
+`http://localhost:9001` (`minioadmin` / `minioadmin` con el ejemplo).
+
+Prueba una carga con:
+
+```bash
+curl -F "file=@imagen.png" http://localhost:3000/storage/upload
+```
+
+La respuesta incluye la clave y una URL firmada válida por una hora. También
+existen `GET /storage/:key/url` y `DELETE /storage/:key`.
+
+Para AWS S3, elimina `S3_ENDPOINT`, usa `S3_FORCE_PATH_STYLE=false` y entrega
+credenciales mediante un rol IAM (recomendado) o las variables estándar del SDK.
+El código de la aplicación no cambia.
+
 ## Project setup
 
 ```bash

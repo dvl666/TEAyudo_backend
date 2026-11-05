@@ -1,0 +1,46 @@
+name: Deploy TEAyudo Backend to AWS Lambda
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout del Código
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Instalar Dependencias
+        run: npm install
+
+      - name: 🔨 Compilar NestJS
+        run: npm run build
+
+      - name: 🧹 Preparar Paquete de Producción
+        run: |
+          # Eliminar dependencias de desarrollo para reducir el tamaño del ZIP
+          npm prune --production
+          # Crear paquete ZIP con el código compilado y dependencias de producción
+          zip -r deploy.zip dist node_modules package.json
+
+      - name: 🔐 Configurar Credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'sa-east-1' }}
+
+      - name: 🚀 Desplegar Código en AWS Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME || 'teayudo-backend' }} \
+            --zip-file fileb://deploy.zip

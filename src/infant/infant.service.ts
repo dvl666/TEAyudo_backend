@@ -1,0 +1,125 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Infant } from './entities/infant.entity';
+import { Repository } from 'typeorm';
+import { Pictogram } from 'src/pictogram/entities/pictogram.entity';
+import { CreateInfantDto } from './dtos/create-infant.dto';
+import { UserService } from 'src/user/user.service';
+import { StorageService } from 'src/storage/storage.service';
+import { UpdateInfantDto } from './dtos/update-infant.dto';
+
+export interface InfantAvatarFile {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+}
+
+@Injectable()
+export class InfantService {
+  constructor(
+    @InjectRepository(Infant)
+    private readonly infantRepository: Repository<Infant>,
+    private readonly userService: UserService,
+    private readonly storageService: StorageService,
+  ) {}
+
+  private async withSignedAvatar(infant: Infant): Promise<Infant> {
+    if (infant.avatarUrl && infant.avatarUrl.startsWith('avatars/')) {
+      try {
+        const signedUrl = await this.storageService.getSignedUrl(infant.avatarUrl);
+        return {
+          ...infant,
+          avatarUrl: signedUrl,
+        };
+      } catch (err) {
+        console.error(`Error al firmar avatar para infante ${infant.id}:`, err);
+      }
+    }
+    return infant;
+  }
+
+  async create(createInfantDto: CreateInfantDto): Promise<Infant> {
+    const user = await this.userService.findOne(createInfantDto.userId);
+    const { userId, ...infantData } = createInfantDto;
+    const infant = this.infantRepository.create(infantData);
+    infant.users = [user!];
+    const saved = await this.infantRepository.save(infant);
+    return this.withSignedAvatar(saved);
+  }
+
+  async findAll(): Promise<Infant[]> {
+    const infants = await this.infantRepository.find();
+    return Promise.all(infants.map((i) => this.withSignedAvatar(i)));
+  }
+
+  async findOne(id: string): Promise<Infant> {
+    const infant = await this.infantRepository.findOne({ where: { id } });
+    if (!infant) throw new NotFoundException(`Infant with id ${id} not found`);
+    return this.withSignedAvatar(infant);
+  }
+
+  async findOneWithInfants( id: string ) {
+    const infant = await this.infantRepository.findOne({ 
+      where: { id },
+      relations: { users: true }
+    });
+    if (!infant) throw new NotFoundException(`Infant with id ${id} not found`);
+    return this.withSignedAvatar(infant);
+  }
+
+  async update(id: string, updateInfantDto: UpdateInfantDto): Promise<Infant> {
+    const infant = await this.findOne(id);
+    const updatedInfant = {
+      ...infant,
+      ...updateInfantDto,
+    };
+    const saved = await this.infantRepository.save(updatedInfant);
+    return this.withSignedAvatar(saved);
+  }
+
+  async uploadAvatar(id: string, file: InfantAvatarFile): Promise<Record<string, unknown>> {
+    const infant = await this.findOne(id);
+    const previousAvatarKey = infant.avatarUrl;
+    const uploaded = await this.storageService.uploadAvatar(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
+
+    try {
+      infant.avatarUrl = uploaded.key;
+      const saved = await this.infantRepository.save(infant);
+
+      if (previousAvatarKey?.startsWith('avatars/')) {
+        await this.storageService
+          .delete(previousAvatarKey)
+          .catch(() => undefined);
+      }
+
+      return {
+        ...saved,
+        avatarKey: uploaded.key,
+        avatarUrl: uploaded.url,
+      };
+    } catch (error) {
+      await this.storageService.delete(uploaded.key).catch(() => undefined);
+      throw error;
+    }
+  }
+
+  async deleteInfant(infantId: string): Promise<void> {
+    await this.infantRepository.manager.transaction(async (manager) => {
+      const result = await manager.delete(Infant, infantId);
+      if (!result.affected) {
+        throw new NotFoundException('Infante no encontrado');
+      }
+
+      await manager
+        .createQueryBuilder()
+        .update(Pictogram)
+        .set({ infantId: () => 'array_remove("infantId", CAST(:infantId AS uuid))' })
+        .where('CAST(:infantId AS uuid) = ANY("infantId")', { infantId })
+        .execute();
+    });
+  }
+}

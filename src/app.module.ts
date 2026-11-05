@@ -2,21 +2,72 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './user/user.module';
+import { InfantModule } from './infant/infant.module';
+import { CategoryModule } from './category/category.module';
+import { PictogramModule } from './pictogram/pictogram.module';
+import { GameModule } from './game/game.module';
+import { GameProgressModule } from './game-progress/game-progress.module';
+import { RoutineModule } from './routine/routine.module';
+import { User } from './user/entities/user.entity';
+import { Routine } from './routine/entities/routine.entity';
+import { RoutineActivity } from './routine/entities/routine-activity.entity';
+import { Game } from './game/entities/game.entity';
+import { Infant } from './infant/entities/infant.entity';
+import { Pictogram } from './pictogram/entities/pictogram.entity';
+import { GameProgress } from './game-progress/entities/game-progress.entity';
+import { Category } from './category/entities/category.entity';
+import { StorageModule } from './storage/storage.module';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { AuthorizationModule } from './authorization/authorization.module';
+import { TtsModule } from './tts/tts.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'dvl',
-      password: '666',
-      database: 'appdb',
-      entities: [],
+      host: process.env.DB_HOST ?? 'localhost',
+      port: Number(process.env.DB_PORT ?? 5432),
+      username: process.env.DB_USERNAME ?? 'dvl',
+      password: process.env.DB_PASSWORD ?? '666',
+      database: process.env.DB_DATABASE ?? 'appdb',
+      ssl:
+        process.env.DB_SSL === 'true'
+          ? {
+              // Solo para pruebas: cifra sin verificar el certificado del servidor.
+              rejectUnauthorized: false,
+            }
+          : false,
+        extra: process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : undefined,
+      entities: [
+        User,
+        Routine,
+        RoutineActivity,
+        Game,
+        Infant,
+        Pictogram,
+        GameProgress,
+        Category,
+      ],
       synchronize: true,
+      // ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     }),
+    UserModule,
+    InfantModule,
+    CategoryModule,
+    PictogramModule,
+    GameModule,
+    GameProgressModule,
+    RoutineModule,
+    StorageModule,
+    AuthModule,
+    AuthorizationModule,
+    TtsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
+
 export class AppModule {}
