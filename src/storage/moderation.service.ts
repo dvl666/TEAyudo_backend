@@ -38,6 +38,16 @@ const BAD_PICTOGRAM_WORDS = [
   'teton',
   'amariconao',
   'amaricanada',
+  'weona',
+  'aweonao',
+  'aweona',
+  'pollon',
+  'putito',
+  'putita',
+  'hueon',
+  'marica',
+  'hueco',
+  'amujerao',
 ];
 
 @Injectable()
