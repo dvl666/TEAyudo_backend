@@ -5,6 +5,41 @@ import {
 } from '@aws-sdk/client-rekognition';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
+const BAD_PICTOGRAM_WORDS = [
+  'puto',
+  'puta',
+  'weon',
+  'gueon',
+  'pene',
+  'polla',
+  'vagina',
+  'maricon',
+  'maricona',
+  'feo',
+  'fea',
+  'estupido',
+  'estupida',
+  'nigga',
+  'niggi',
+  'niger',
+  'nigger',
+  'tonto',
+  'tonta',
+  'gordo',
+  'gorda',
+  'arma',
+  'disparo',
+  'dispara',
+  'bala',
+  'balas',
+  'pistola',
+  'metralleta',
+  'tetas',
+  'teton',
+  'amariconao',
+  'amaricanada',
+];
+
 @Injectable()
 export class ModerationService {
   private readonly logger = new Logger(ModerationService.name);
@@ -18,6 +53,22 @@ export class ModerationService {
           }
         : undefined,
   });
+
+  validatePictogramName(name: string): void {
+    const normalize = (value: string) =>
+      value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+    const normalizedName = normalize(name);
+
+    if (BAD_PICTOGRAM_WORDS.some((word) => normalizedName.includes(normalize(word)))) {
+      throw new BadRequestException(
+        'El nombre del pictograma contiene una palabra no permitida.',
+      );
+    }
+  }
 
   /**
    * Analiza una imagen en memoria con AWS Rekognition.

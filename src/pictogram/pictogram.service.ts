@@ -40,6 +40,7 @@ export class PictogramService {
 
   async create( dto: CreatePictogramDto, file: PictogramImageFile ): Promise<PictogramImageSigned> {
     try {
+      this.moderationService.validatePictogramName(dto.pictogramName);
       await this.categoryService.findOne(dto.categoryId);
 
       const user: any = await this.userService.findOne(dto.userId);
@@ -167,6 +168,10 @@ export class PictogramService {
     const pictogram = await this.pictogramRepository.findOne({ where: { id } });
     if (!pictogram)
       throw new NotFoundException(`Pictogram with ID ${id} not found`);
+    this.moderationService.validatePictogramName(
+      updatedDto.pictogramName ?? pictogram.pictogramName,
+    );
+
     const { categoryId, ...pictogramData } = updatedDto;
     if (categoryId !== undefined)
       pictogram.category = (await this.categoryService.findOne(categoryId))!;
@@ -258,6 +263,8 @@ export class PictogramService {
     if (!pictogram) {
       throw new NotFoundException(`Pictogram with ID ${id} not found`);
     }
+
+    this.moderationService.validatePictogramName(pictogram.pictogramName);
 
     // Validar la imagen con AWS Rekognition antes de subir a S3
     await this.moderationService.validateImageBuffer(file.buffer);
