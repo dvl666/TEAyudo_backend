@@ -23,7 +23,7 @@ export class RoutineActivity {
 
   @ManyToOne(() => Pictogram, (pictogram) => pictogram.routineActivities, {
     nullable: false,
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   pictogram: Pictogram;
 

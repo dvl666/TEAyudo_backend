@@ -3,6 +3,8 @@ import {
   Controller,
   FileTypeValidator,
   Get,
+  HttpCode,
+  HttpStatus,
   MaxFileSizeValidator,
   Param,
   Patch,
@@ -11,6 +13,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreatePictogramDto } from './dtos/create-pictogram.dto';
@@ -77,6 +80,15 @@ export class PictogramController {
   @Auth( ValidRoles.USER )
   findAllByTutorId(@Param( 'tutorId', new ParseUUIDPipe() ) tutorId: string ) {
     return this.pictogramService.findAllByTutorId( tutorId );
+  }
+
+  @Delete('delete/:pictogramId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Authorization( AccessType.PICTOGRAM )
+  @Auth( ValidRoles.USER, ValidRoles.ADMIN )
+  remove(@Param('pictogramId', new ParseUUIDPipe()) pictogramId: string) {
+    console.log('Deleting pictogram with ID:', pictogramId);
+    return this.pictogramService.remove(pictogramId);
   }
 
   @Patch(':pictogramId')

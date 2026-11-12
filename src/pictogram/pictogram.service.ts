@@ -161,6 +161,13 @@ export class PictogramService {
     return Promise.all(pictograms.map((item) => this.withSignedImage(item)));
   }
 
+  async remove(id: string): Promise<void> {
+    const result = await this.pictogramRepository.delete(id);
+    if (!result.affected) {
+      throw new NotFoundException(`Pictogram with ID ${id} not found`);
+    }
+  }
+
   async update(
     id: string,
     updatedDto: UpdatePictogramDto,
